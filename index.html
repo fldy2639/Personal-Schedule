@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日效率记录</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: #3498db;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .date-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .current-date {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .current-time {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-1px);
+        }
+
+        .time-blocks {
+            grid-column: 1;
+        }
+
+        .tasks {
+            grid-column: 2;
+        }
+
+        .notes {
+            grid-column: 1;
+        }
+
+        .mood-energy {
+            grid-column: 2;
+        }
+
+        .time-block-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            padding: 10px 0;
+        }
+
+        /* 时间轴样式 - 垂直布局 */
+        .time-axis {
+            position: relative;
+            height: 600px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px 20px 20px 0;
+            margin-bottom: 20px;
+            border: 1px solid #d0d7de;
+            display: flex;
+            flex-direction: row;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .time-labels {
+            width: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #4a5c6d;
+            padding: 20px 0;
+            background: #f8f9fa;
+            border-right: 1px solid #d0d7de;
+            font-weight: 600;
+        }
+
+        .time-label {
+            position: relative;
+            text-align: right;
+            padding: 4px 12px 4px 4px;
+            margin: 0;
+            line-height: 1;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 2px 0 0 2px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #4a5c6d;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+        }
+
+        .time-label::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 8px;
+            height: 1px;
+            background: #90a4ae;
+        }
+
+        .time-axis-grid {
+            flex: 1;
+            position: relative;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            margin-left: 0;
+            overflow: hidden;
+            height: 100%;
+            min-height: 600px;
+            background-image: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 65px,
+                #f0f3f5 65px,
+                #f0f3f5 66px
+            );
+            background-position: 0 20px;
+        }
+
+        .time-block-timeline {
+            position: absolute;
+            background-color: #3498db;
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.08) 100%);
+            border-radius: 6px;
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            cursor: move;
+            overflow: hidden;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 40px;
+            left: 10px;
+            right: 10px;
+        }
+
+        .time-block-timeline:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+            border-color: rgba(255,255,255,0.4);
+            z-index: 10;
+        }
+
+        .time-block-timeline.selected {
+            border-color: #2c3e50;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.4), 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+
+        .time-block-content {
+            position: relative;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .time-block-time {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+        }
+
+        .time-block-activity {
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 编辑模式下的时间块 */
+        .time-block-edit {
+            display: grid;
+            grid-template-columns: 90px 90px 1fr 24px 60px;
+            gap: 10px;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .time-block-edit .time-input {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .time-block-edit input[type="time"] {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+
+        .time-block-edit .activity-input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .time-block-edit .tag-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #95a5a6;
+            justify-self: center;
+        }
+
+        .time-block-edit .btn-small {
+            justify-self: center;
+            min-width: 40px;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 6px 8px;
+        }
+
+        .time-block-tag {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.7;
+            z-index: 1;
+            border-radius: 6px;
+        }
+
+        /* 标签颜色 */
+        .tag-work { background: #ffeaa7; }
+        .tag-study { background: #a29bfe; }
+        .tag-rest { background: #81ecec; }
+        .tag-exercise { background: #55efc4; }
+        .tag-social { background: #fd79a8; }
+        .tag-other { background: #dfe6e9; }
+
+        /* 番茄钟样式 */
+        .pomodoro-panel {
+            transition: all 0.3s;
+        }
+
+        .pomodoro-panel.running {
+            background: rgba(46, 204, 113, 0.05);
+            border-color: #2ecc71 !important;
+        }
+
+        .pomodoro-panel.break {
+            background: rgba(52, 152, 219, 0.05);
+            border-color: #3498db !important;
+        }
+
+        #pomodoroTimer.alert {
+            color: #e74c3c;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .task-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .task-text {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: #95a5a6;
+            background: #ecf0f1;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .mood-energy-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .rating-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rating-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .rating-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            min-width: 60px;
+        }
+
+        .rating-btn:hover {
+            border-color: #3498db;
+        }
+
+        .rating-btn.selected {
+            border-color: #3498db;
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        .footer {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .template-selector {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .template-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .template-btn {
+            padding: 8px 15px;
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-btn:hover {
+            background: #d5dbdb;
+        }
+
+        .template-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .icon {
+            font-style: normal;
+        }
+
+        /* 颜色标签 */
+        .color-tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .color-tag {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .color-tag.selected {
+            border-color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .tag-work { background: #ffeaa7; color: #d35400; }
+        .tag-study { background: #a29bfe; color: #2d3436; }
+        .tag-rest { background: #81ecec; color: #0984e3; }
+        .tag-exercise { background: #55efc4; color: #00b894; }
+        .tag-social { background: #fd79a8; color: #e84393; }
+        .tag-other { background: #dfe6e9; color: #636e72; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="date-section">
+                <div class="current-date" id="currentDate">2023年10月27日 星期五</div>
+                <div class="current-time" id="currentTime">14:30:45</div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="loadTemplateBtn">
+                    <span class="icon">📋</span> 加载模板
+                </button>
+                <button class="btn btn-primary" id="saveBtn">
+                    <span class="icon">💾</span> 保存到本地
+                </button>
+                <button class="btn btn-danger" id="clearBtn">
+                    <span class="icon">🗑️</span> 清空数据
+                </button>
+                <button class="btn btn-success" id="exportBtn">
+                    <span class="icon">📤</span> 导出Markdown
+                </button>
+            </div>
+        </div>
+
+        <!-- 时间块记录 -->
+        <div class="card time-blocks">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">⏰</span> 时间记录
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary btn-small" id="addTimeBlockBtn">
+                        <span class="icon">+</span> 添加时间段
+                    </button>
+                    <button class="btn btn-secondary btn-small" id="toggleViewBtn">
+                        <span class="icon">📊</span> 切换视图
+                    </button>
+                </div>
+            </div>
+
+            <!-- 时间轴视图 -->
+            <div class="time-axis" id="timeAxisView" style="display: none;">
+                <div class="time-labels">
+                    <div class="time-label">06:00</div>
+                    <div class="time-label">08:00</div>
+                    <div class="time-label">10:00</div>
+                    <div class="time-label">12:00</div>
+                    <div class="time-label">14:00</div>
+                    <div class="time-label">16:00</div>
+                    <div class="time-label">18:00</div>
+                    <div class="time-label">20:00</div>
+                    <div class="time-label">22:00</div>
+                    <div class="time-label">24:00</div>
+                </div>
+                <div class="time-axis-grid" id="timeAxisGrid">
+                    <!-- 时间块将通过JS动态添加为时间轴条 -->
+                </div>
+                <div style="text-align: center; margin-top: 10px; font-size: 0.85rem; color: #7f8c8d;">
+                    点击并拖动时间块调整位置和时长 | 双击时间块编辑详情
+                </div>
+            </div>
+
+            <!-- 编辑列表视图 -->
+            <div class="time-block-list" id="timeBlockListView">
+                <!-- 时间块将通过JS动态添加为编辑行 -->
+            </div>
+
+            <div class="template-selector">
+                <div style="font-weight: 600; margin-bottom: 8px; color: #2c3e50;">快速标签（点击应用到选中的时间块）：</div>
+                <div class="color-tags">
+                    <div class="color-tag tag-work" data-tag="工作">工作</div>
+                    <div class="color-tag tag-study" data-tag="学习">学习</div>
+                    <div class="color-tag tag-rest" data-tag="休息">休息</div>
+                    <div class="color-tag tag-exercise" data-tag="运动">运动</div>
+                    <div class="color-tag tag-social" data-tag="社交">社交</div>
+                    <div class="color-tag tag-other" data-tag="其他">其他</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.85rem; color: #7f8c8d;">
+                    提示：先选中时间块（点击时间轴上的块或编辑行的标签），然后点击标签应用
+                </div>
+
+                <!-- 番茄钟功能 -->
+                <div class="pomodoro-panel" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid #eee;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div class="card-title" style="margin: 0;">
+                            <span class="icon">🍅</span> 番茄钟
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary btn-small" id="pomodoroStartBtn">
+                                <span class="icon">▶️</span> 开始
+                            </button>
+                            <button class="btn btn-secondary btn-small" id="pomodoroPauseBtn" style="display: none;">
+                                <span class="icon">⏸️</span> 暂停
+                            </button>
+                            <button class="btn btn-danger btn-small" id="pomodoroResetBtn">
+                                <span class="icon">🔄</span> 重置
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 20px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 3.5rem; font-weight: 700; color: #2c3e50; font-family: monospace;" id="pomodoroTimer">25:00</div>
+                            <div style="font-size: 1.1rem; color: #7f8c8d;" id="pomodoroStatus">准备开始</div>
+                        </div>
+
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <div style="font-weight: 600; color: #2c3e50;">阶段:</div>
+                                <div style="font-weight: 600; color: #3498db;" id="pomodoroPhase">工作 (25分钟)</div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <div style="font-weight: 600; color: #2c3e50;">任务名称:</div>
+                                <input type="text" id="pomodoroTaskName" placeholder="输入任务名称" style="flex: 1; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem; margin-left: 10px;">
+                            </div>
+                            <div style="background: #ecf0f1; height: 10px; border-radius: 5px; overflow: hidden;">
+                                <div id="pomodoroProgress" style="height: 100%; background: #2ecc71; width: 0%; transition: width 1s linear;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.85rem; color: #7f8c8d;">
+                                <div>已完成: <span id="pomodoroCompleted">0</span> 个</div>
+                                <div>下一个: <span id="pomodoroNext">休息 (5分钟)</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 0.9rem; color: #7f8c8d; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="display: flex; gap: 15px; margin-bottom: 8px;">
+                            <div><span style="color: #e74c3c;">●</span> 工作: <span id="pomodoroWorkTime">25</span> 分钟</div>
+                            <div><span style="color: #2ecc71;">●</span> 休息: <span id="pomodoroRestTime">5</span> 分钟</div>
+                        </div>
+                        <div>提示：番茄钟完成后会自动记录时间块到上方时间轴</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务列表 -->
+        <div class="card tasks">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">✅</span> 今日任务
+                </div>
+                <button class="btn btn-primary btn-small" id="addTaskBtn">
+                    <span class="icon">+</span> 添加任务
+                </button>
+            </div>
+            <div class="task-list" id="taskList">
+                <!-- 任务将通过JS动态添加 -->
+            </div>
+        </div>
+
+        <!-- 笔记区域 -->
+        <div class="card notes">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">📝</span> 笔记与反思
+                </div>
+            </div>
+            <textarea class="notes-textarea" id="notesText" placeholder="记录今天的想法、收获、反思..."></textarea>
+        </div>
+
+        <!-- 情绪与精力 -->
+        <div class="card mood-energy">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">😊</span> 状态评估
+                </div>
+            </div>
+            <div class="mood-energy-grid">
+                <div class="rating-section">
+                    <div class="rating-title">情绪</div>
+                    <div class="rating-buttons" id="moodButtons">
+                        <button class="rating-btn" data-value="1">😞 差</button>
+                        <button class="rating-btn" data-value="2">😐 一般</button>
+                        <button class="rating-btn" data-value="3">😊 好</button>
+                        <button class="rating-btn" data-value="4">😄 很好</button>
+                        <button class="rating-btn" data-value="5">🤩 极好</button>
+                    </div>
+                </div>
+                <div class="rating-section">
+                    <div class="rating-title">精力</div>
+                    <div class="rating-buttons" id="energyButtons">
+                        <button class="rating-btn" data-value="1">😴 低</button>
+                        <button class="rating-btn" data-value="2">😌 中低</button>
+                        <button class="rating-btn" data-value="3">🙂 中等</button>
+                        <button class="rating-btn" data-value="4">💪 充沛</button>
+                        <button class="rating-btn" data-value="5">⚡ 旺盛</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="template-selector">
+                <div style="font-weight: 600; margin-bottom: 8px; color: #2c3e50;">每日模板：</div>
+                <div class="template-buttons">
+                    <button class="template-btn" data-template="default">默认模板</button>
+                    <button class="template-btn" data-template="work">工作日志</button>
+                    <button class="template-btn" data-template="study">学习日志</button>
+                    <button class="template-btn" data-template="creative">创意日志</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>每日效率记录工具 • 数据保存于浏览器本地存储 • 支持导出为Markdown格式到Obsidian</p>
+            <p style="margin-top: 5px; font-size: 0.85rem;">提示：使用"导出Markdown"功能将记录保存到本地文件，然后复制到Obsidian vault目录</p>
+        </div>
+    </div>
+
+    <script>
+        // 应用状态
+        const state = {
+            date: new Date(),
+            timeBlocks: [],
+            tasks: [],
+            notes: '',
+            mood: 3,
+            energy: 3,
+            selectedTags: [],
+            selectedTimeBlockId: null,  // 当前选中的时间块ID
+            viewMode: 'list'  // 'list' 或 'timeline'
+        };
+
+        // 辅助函数
+        function getTodayKey() {
+            const now = new Date();
+            return now.toISOString().split('T')[0]; // YYYY-MM-DD
+        }
+
+        function getAllData() {
+            const allData = localStorage.getItem('efficiencyTrackerAllData');
+            return allData ? JSON.parse(allData) : {};
+        }
+
+        function saveAllData(allData) {
+            localStorage.setItem('efficiencyTrackerAllData', JSON.stringify(allData));
+        }
+
+        // 迁移旧数据
+        function migrateOldData() {
+            const oldData = localStorage.getItem('efficiencyTrackerData');
+            if (oldData) {
+                try {
+                    const data = JSON.parse(oldData);
+                    const todayKey = getTodayKey();
+                    const allData = getAllData();
+                    // 如果今天还没有数据，使用旧数据
+                    if (!allData[todayKey]) {
+                        allData[todayKey] = {
+                            timeBlocks: data.timeBlocks || [],
+                            tasks: data.tasks || [],
+                            notes: data.notes || '',
+                            mood: data.mood || 3,
+                            energy: data.energy || 3,
+                            viewMode: data.viewMode || 'list',
+                            lastSaved: data.lastSaved || new Date().toISOString()
+                        };
+                        saveAllData(allData);
+                    }
+                    // 删除旧数据
+                    localStorage.removeItem('efficiencyTrackerData');
+                } catch (e) {
+                    console.error('迁移旧数据失败:', e);
+                }
+            }
+        }
+
+        // DOM 元素
+        const currentDateEl = document.getElementById('currentDate');
+        const currentTimeEl = document.getElementById('currentTime');
+        const timeBlockListEl = document.getElementById('timeBlockListView');
+        const timeAxisViewEl = document.getElementById('timeAxisView');
+        const timeAxisGridEl = document.getElementById('timeAxisGrid');
+        const taskListEl = document.getElementById('taskList');
+        const notesTextEl = document.getElementById('notesText');
+        const moodButtons = document.querySelectorAll('#moodButtons .rating-btn');
+        const energyButtons = document.querySelectorAll('#energyButtons .rating-btn');
+        const addTimeBlockBtn = document.getElementById('addTimeBlockBtn');
+        const toggleViewBtn = document.getElementById('toggleViewBtn');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+        const templateButtons = document.querySelectorAll('.template-btn');
+        const colorTags = document.querySelectorAll('.color-tag');
+
+        // 初始化
+        function init() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            // 从localStorage加载数据
+            loadFromStorage();
+
+            // 初始化默认时间块
+            if (state.timeBlocks.length === 0) {
+                addTimeBlock('09:00', '10:30', '');
+            }
+
+            // 初始化默认任务
+            if (state.tasks.length === 0) {
+                addTask('示例任务，点击编辑');
+            }
+
+            // 事件监听
+            setupEventListeners();
+
+            // 根据视图模式显示正确的视图
+            updateView();
+
+            // 渲染
+            renderTimeBlocks();
+            renderTimeAxis();
+            renderTasks();
+
+            // 设置选中状态
+            setRatingSelection(moodButtons, state.mood);
+            setRatingSelection(energyButtons, state.energy);
+
+            // 初始化番茄钟
+            initPomodoro();
+
+            // 标签选择已集成到时间块中
+        }
+
+        // 更新视图显示
+        function updateView() {
+            if (state.viewMode === 'timeline') {
+                timeAxisViewEl.style.display = 'block';
+                timeBlockListEl.style.display = 'none';
+                toggleViewBtn.innerHTML = '<span class="icon">📝</span> 列表视图';
+            } else {
+                timeAxisViewEl.style.display = 'none';
+                timeBlockListEl.style.display = 'block';
+                toggleViewBtn.innerHTML = '<span class="icon">📊</span> 时间轴视图';
+            }
+        }
+
+        // 切换视图
+        function toggleView() {
+            state.viewMode = state.viewMode === 'list' ? 'timeline' : 'list';
+            updateView();
+            if (state.viewMode === 'timeline') {
+                // 延迟渲染确保元素可见
+                setTimeout(() => {
+                    renderTimeAxis();
+                }, 50);
+            }
+        }
+
+        // 更新日期时间
+        function updateDateTime() {
+            const now = new Date();
+            state.date = now;
+
+            // 格式化日期
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            currentDateEl.textContent = now.toLocaleDateString('zh-CN', dateOptions);
+
+            // 格式化时间
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            currentTimeEl.textContent = now.toLocaleTimeString('zh-CN', timeOptions);
+        }
+
+        // 添加时间块
+        function addTimeBlock(startTime = '', endTime = '', activity = '', tags = []) {
+            const id = (Date.now() + Math.random()).toString();
+            state.timeBlocks.push({
+                id,
+                startTime: startTime || getDefaultStartTime(),
+                endTime: endTime || getDefaultEndTime(),
+                activity,
+                tags: tags
+            });
+            renderTimeBlocks();
+            renderTimeAxis();
+            saveToStorage();
+            // 自动选中新添加的时间块
+            selectTimeBlock(id);
+        }
+
+        // 获取默认开始时间（当前时间的前一小时）
+        function getDefaultStartTime() {
+            const now = new Date();
+            now.setHours(now.getHours() - 1);
+            return formatTime(now);
+        }
+
+        // 获取默认结束时间（当前时间）
+        function getDefaultEndTime() {
+            return formatTime(new Date());
+        }
+
+        // 格式化时间为HH:MM
+        function formatTime(date) {
+            return date.getHours().toString().padStart(2, '0') + ':' +
+                   date.getMinutes().toString().padStart(2, '0');
+        }
+
+        // 删除时间块
+        function removeTimeBlock(id) {
+            const blockId = id.toString();
+            state.timeBlocks = state.timeBlocks.filter(block => block.id !== blockId);
+            renderTimeBlocks();
+            saveToStorage();
+        }
+
+        // 更新时间块
+        function updateTimeBlock(id, field, value) {
+            const blockId = id.toString();
+            const block = state.timeBlocks.find(b => b.id === blockId);
+            if (block) {
+                block[field] = value;
+                saveToStorage();
+            }
+        }
+
+        // 渲染时间块编辑列表
+        function renderTimeBlocks() {
+            timeBlockListEl.innerHTML = '';
+
+            // 点击空白处取消选中
+            timeBlockListEl.onclick = (e) => {
+                if (e.target === timeBlockListEl) {
+                    state.selectedTimeBlockId = null;
+                    renderTimeBlocks();
+                    renderTimeAxis();
+                }
+            };
+
+            state.timeBlocks.forEach((block, index) => {
+                const isSelected = state.selectedTimeBlockId === block.id;
+                const tagName = block.tags && block.tags.length > 0 ? block.tags[0] : '其他';
+                const tagColor = getTagColor(tagName);
+
+                const timeBlockEl = document.createElement('div');
+                timeBlockEl.className = `time-block-edit ${isSelected ? 'selected' : ''}`;
+                timeBlockEl.style.borderLeftColor = tagColor;
+                timeBlockEl.onclick = (e) => {
+                    if (!e.target.closest('button') && !e.target.matches('input')) {
+                        selectTimeBlock(block.id);
+                    }
+                };
+                timeBlockEl.innerHTML = `
+                    <div class="time-input">
+                        <input type="time" value="${block.startTime}"
+                               onchange="updateTimeBlock(${block.id}, 'startTime', this.value)">
+                    </div>
+                    <div class="time-input">
+                        <input type="time" value="${block.endTime}"
+                               onchange="updateTimeBlock(${block.id}, 'endTime', this.value)">
+                    </div>
+                    <input type="text" class="activity-input" value="${block.activity}"
+                           placeholder="活动内容"
+                           oninput="updateTimeBlock(${block.id}, 'activity', this.value)">
+                    <div class="tag-indicator" style="background: ${tagColor}"></div>
+                    <button class="btn btn-danger btn-small" onclick="removeTimeBlock(${block.id})">
+                        <span class="icon">×</span>
+                    </button>
+                `;
+                timeBlockListEl.appendChild(timeBlockEl);
+            });
+        }
+
+        // 获取标签颜色
+        function getTagColor(tagName) {
+            const colors = {
+                '工作': '#ffeaa7',
+                '学习': '#a29bfe',
+                '休息': '#81ecec',
+                '运动': '#55efc4',
+                '社交': '#fd79a8',
+                '其他': '#dfe6e9'
+            };
+            return colors[tagName] || '#dfe6e9';
+        }
+
+        // 获取标签类名
+        function getTagClassName(tagName) {
+            const classMap = {
+                '工作': 'tag-work',
+                '学习': 'tag-study',
+                '休息': 'tag-rest',
+                '运动': 'tag-exercise',
+                '社交': 'tag-social',
+                '其他': 'tag-other'
+            };
+            return classMap[tagName] || 'tag-other';
+        }
+
+        // 选中时间块
+        function selectTimeBlock(id) {
+            state.selectedTimeBlockId = id.toString();
+            renderTimeBlocks();
+            renderTimeAxis();
+        }
+
+        // 应用标签到选中的时间块
+        function applyTagToSelectedTimeBlock(tagName) {
+            if (!state.selectedTimeBlockId) {
+                alert('请先选中一个时间块（点击时间块）');
+                return;
+            }
+
+            const block = state.timeBlocks.find(b => b.id === state.selectedTimeBlockId);
+            if (block) {
+                // 如果已经包含该标签，则移除；否则添加
+                const index = block.tags.indexOf(tagName);
+                if (index === -1) {
+                    // 移除其他标签，只保留一个主要标签
+                    block.tags = [tagName];
+                } else {
+                    block.tags.splice(index, 1);
+                }
+
+                updateTimeBlock(block.id, 'tags', block.tags);
+                renderTimeBlocks();
+                renderTimeAxis();
+            }
+        }
+
+        // 渲染时间轴
+        function renderTimeAxis() {
+            if (!timeAxisGridEl) return;
+
+            timeAxisGridEl.innerHTML = '';
+
+            // 点击空白处取消选中
+            timeAxisGridEl.onclick = (e) => {
+                if (e.target === timeAxisGridEl) {
+                    state.selectedTimeBlockId = null;
+                    renderTimeBlocks();
+                    renderTimeAxis();
+                }
+            };
+
+            // 如果时间轴视图不可见，跳过位置计算
+            if (timeAxisViewEl.offsetParent === null) {
+                return;
+            }
+
+            // 获取容器的实际内容高度（减去边框和内边距）
+            const gridHeight = timeAxisGridEl.clientHeight;
+            const gridRect = timeAxisGridEl.getBoundingClientRect();
+            console.log('时间轴容器 - clientHeight:', gridHeight, 'boundingRect高度:', gridRect.height, '边框:', gridRect.height - gridHeight, 'rect:', gridRect);
+
+            const startHour = 6; // 从6点开始
+            const endHour = 24;  // 到24点结束
+            const hourRange = endHour - startHour;
+
+            // 考虑时间轴标签的内边距（上下各20px）
+            const verticalOffset = 20;
+            const availableHeight = gridHeight - verticalOffset * 2;
+            const pxPerHour = availableHeight / hourRange;
+
+            console.log('pxPerHour:', pxPerHour, '时间块数量:', state.timeBlocks.length, '可用高度:', availableHeight, '总高度:', gridHeight);
+
+            state.timeBlocks.forEach((block, index) => {
+                if (!block.startTime || !block.endTime) return;
+
+                const [startH, startM] = block.startTime.split(':').map(Number);
+                const [endH, endM] = block.endTime.split(':').map(Number);
+
+                // 计算位置，限制在6-24点范围内
+                let startHourDecimal = Math.max(startH + startM / 60, startHour);
+                let endHourDecimal = Math.min(endH + endM / 60, endHour);
+                // 确保开始时间早于结束时间
+                if (endHourDecimal < startHourDecimal) {
+                    endHourDecimal = startHourDecimal + 1; // 默认1小时
+                }
+                let top = (startHourDecimal - startHour) * pxPerHour + verticalOffset;
+                const height = (endHourDecimal - startHourDecimal) * pxPerHour;
+
+                // 至少20像素高
+                const minHeight = 20;
+                const actualHeight = Math.max(height, minHeight);
+
+                // 确保不超出容器底部
+                const maxTop = gridHeight - actualHeight;
+                if (top > maxTop) {
+                    top = maxTop;
+                }
+                if (top < verticalOffset) {
+                    top = verticalOffset;
+                }
+
+                // 调试日志
+                console.log(`时间块 ${index}: ${block.startTime}-${block.endTime}`, {
+                    startH, startM, endH, endM,
+                    startHourDecimal, endHourDecimal,
+                    top, height, actualHeight,
+                    pxPerHour,
+                    verticalOffset,
+                    availableHeight,
+                    gridHeight,
+                    maxTop
+                });
+
+                const tagName = block.tags && block.tags.length > 0 ? block.tags[0] : '其他';
+                const tagClass = getTagClassName(tagName); // 转换为CSS类名
+                const isSelected = state.selectedTimeBlockId === block.id;
+
+                const timeBlockEl = document.createElement('div');
+                timeBlockEl.className = `time-block-timeline ${isSelected ? 'selected' : ''}`;
+                timeBlockEl.style.top = `${top}px`;
+                timeBlockEl.style.height = `${actualHeight}px`;
+                timeBlockEl.style.backgroundColor = getTagColor(tagName);
+                timeBlockEl.title = `${block.startTime}-${block.endTime}: ${block.activity}`;
+
+                // 计算持续时间
+                const duration = calculateDuration(block.startTime, block.endTime);
+
+                timeBlockEl.innerHTML = `
+                    <div class="time-block-tag ${tagClass}"></div>
+                    <div class="time-block-content">
+                        <div class="time-block-time">${block.startTime}-${block.endTime} (${duration})</div>
+                        <div class="time-block-activity">${block.activity || '未命名活动'}</div>
+                    </div>
+                `;
+
+                timeBlockEl.onclick = (e) => {
+                    e.stopPropagation();
+                    selectTimeBlock(block.id);
+                };
+
+                timeBlockEl.ondblclick = () => {
+                    // 双击切换到编辑视图并选中
+                    state.viewMode = 'list';
+                    updateView();
+                    selectTimeBlock(block.id);
+                    renderTimeBlocks();
+                };
+
+                timeAxisGridEl.appendChild(timeBlockEl);
+            });
+        }
+
+        // 添加任务
+        function addTask(text = '', completed = false) {
+            const id = (Date.now() + Math.random()).toString();
+            state.tasks.push({
+                id,
+                text,
+                completed
+            });
+            renderTasks();
+            saveToStorage();
+        }
+
+        // 更新任务
+        function updateTask(id, field, value) {
+            const taskId = id.toString();
+            const task = state.tasks.find(t => t.id === taskId);
+            if (task) {
+                task[field] = value;
+
+                // 直接更新DOM元素，避免重新渲染导致失去焦点
+                const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
+                if (taskEl) {
+                    const textInput = taskEl.querySelector('.task-text');
+                    const checkbox = taskEl.querySelector('.task-checkbox');
+
+                    if (field === 'completed' && textInput) {
+                        if (value) {
+                            textInput.classList.add('completed');
+                        } else {
+                            textInput.classList.remove('completed');
+                        }
+                        if (checkbox) {
+                            checkbox.checked = value;
+                        }
+                    } else if (field === 'text' && textInput) {
+                        // 不需要更新value，因为oninput事件发生时输入框值已更新
+                        // 只需要更新state，已经在上面的task[field] = value中完成
+                        // 但需要确保如果其他原因更新文本时，DOM能同步
+                        if (textInput.value !== value) {
+                            textInput.value = value;
+                        }
+                    }
+                }
+
+                saveToStorage();
+            }
+        }
+
+        // 删除任务
+        function removeTask(id) {
+            const taskId = id.toString();
+            state.tasks = state.tasks.filter(task => task.id !== taskId);
+
+            // 从DOM中移除对应元素
+            const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
+            if (taskEl) {
+                taskEl.remove();
+            }
+
+            saveToStorage();
+        }
+
+        // 渲染任务
+        function renderTasks() {
+            taskListEl.innerHTML = '';
+
+            state.tasks.forEach((task, index) => {
+                const taskEl = document.createElement('div');
+                taskEl.className = 'task-item';
+                taskEl.setAttribute('data-task-id', task.id);
+                taskEl.innerHTML = `
+                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}
+                           onchange="updateTask('${task.id}', 'completed', this.checked)">
+                    <input type="text" class="task-text ${task.completed ? 'completed' : ''}"
+                           value="${task.text}"
+                           oninput="updateTask('${task.id}', 'text', this.value)"
+                           placeholder="任务描述">
+                    <button class="btn btn-danger btn-small" onclick="removeTask('${task.id}')">
+                        <span class="icon">×</span>
+                    </button>
+                `;
+                taskListEl.appendChild(taskEl);
+            });
+        }
+
+        // 设置评分选择
+        function setRatingSelection(buttons, value) {
+            buttons.forEach(btn => {
+                const btnValue = parseInt(btn.getAttribute('data-value'));
+                if (btnValue === value) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        // 不再使用
+
+        // 不再使用
+
+        // 保存到localStorage
+        function saveToStorage() {
+            const todayKey = getTodayKey();
+            const allData = getAllData();
+
+            allData[todayKey] = {
+                timeBlocks: state.timeBlocks,
+                tasks: state.tasks,
+                notes: notesTextEl.value,
+                mood: state.mood,
+                energy: state.energy,
+                viewMode: state.viewMode,
+                lastSaved: new Date().toISOString()
+            };
+
+            saveAllData(allData);
+        }
+
+        // 从localStorage加载（按日期存储）
+        function loadFromStorage() {
+            // 迁移旧数据格式
+            migrateOldData();
+
+            const todayKey = getTodayKey();
+            const allData = getAllData();
+            const todayData = allData[todayKey];
+
+            if (todayData) {
+                state.timeBlocks = todayData.timeBlocks || [];
+                state.tasks = todayData.tasks || [];
+                state.notes = todayData.notes || '';
+                state.mood = todayData.mood || 3;
+                state.energy = todayData.energy || 3;
+                state.viewMode = todayData.viewMode || 'list';
+
+                // 确保每个时间块都有tags数组
+                state.timeBlocks.forEach(block => {
+                    if (!block.tags) block.tags = [];
+                });
+
+                // 更新UI
+                notesTextEl.value = state.notes;
+                setRatingSelection(moodButtons, state.mood);
+                setRatingSelection(energyButtons, state.energy);
+            } else {
+                // 今天没有数据，初始化默认状态（UI已默认）
+                console.log('今天没有历史数据，初始化新的一天');
+            }
+        }
+
+
+        // 加载模板
+        function loadTemplate(templateName) {
+            // 重置状态
+            state.timeBlocks = [];
+            state.tasks = [];
+            state.selectedTimeBlockId = null;
+            notesTextEl.value = '';
+
+            switch (templateName) {
+                case 'work':
+                    // 工作日志模板
+                    addTimeBlock('09:00', '12:00', '专注工作', ['工作']);
+                    addTimeBlock('13:30', '17:30', '项目会议与协作', ['工作']);
+                    addTask('完成项目报告');
+                    addTask('回复重要邮件');
+                    addTask('团队同步会议');
+                    notesTextEl.value = '今日工作重点：\n1. \n2. \n\n遇到的问题：\n\n明日计划：';
+                    break;
+
+                case 'study':
+                    // 学习日志模板
+                    addTimeBlock('09:00', '11:00', '专业知识学习', ['学习']);
+                    addTimeBlock('14:00', '16:00', '实践练习', ['学习']);
+                    addTask('完成课程章节学习');
+                    addTask('整理学习笔记');
+                    addTask('完成练习题');
+                    notesTextEl.value = '今日学习内容：\n\n关键概念：\n\n实践收获：\n\n明日学习计划：';
+                    break;
+
+                case 'creative':
+                    // 创意日志模板
+                    addTimeBlock('10:00', '12:00', '创意构思', ['其他']);
+                    addTimeBlock('15:00', '17:00', '创作实施', ['其他']);
+                    addTask('收集灵感素材');
+                    addTask('完成创意草图');
+                    addTask('整理创作思路');
+                    notesTextEl.value = '灵感来源：\n\n创作过程：\n\n收获与反思：\n\n下一步方向：';
+                    break;
+
+                default:
+                    // 默认模板
+                    addTimeBlock('09:00', '10:30', '');
+                    addTask('示例任务，点击编辑');
+                    notesTextEl.value = '记录今天的想法、收获、反思...';
+                    break;
+            }
+
+            // 更新UI状态
+            state.mood = 3;
+            state.energy = 3;
+            setRatingSelection(moodButtons, 3);
+            setRatingSelection(energyButtons, 3);
+
+            // 渲染
+            renderTimeBlocks();
+            renderTimeAxis();
+            renderTasks();
+            saveToStorage();
+        }
+
+        // 生成Markdown内容
+        function generateMarkdown() {
+            const now = state.date;
+            const dateStr = now.toISOString().split('T')[0];
+            const weekday = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
+
+            // 计算总时间
+            let totalMinutes = 0;
+            state.timeBlocks.forEach(block => {
+                if (block.startTime && block.endTime && block.activity) {
+                    const [startH, startM] = block.startTime.split(':').map(Number);
+                    const [endH, endM] = block.endTime.split(':').map(Number);
+                    const minutes = (endH * 60 + endM) - (startH * 60 + startM);
+                    if (minutes > 0) totalMinutes += minutes;
+                }
+            });
+            const totalHours = Math.floor(totalMinutes / 60);
+            const remainingMinutes = totalMinutes % 60;
+
+            // 收集所有时间块的标签
+            const allTags = new Set();
+            state.timeBlocks.forEach(block => {
+                if (block.tags && block.tags.length > 0) {
+                    block.tags.forEach(tag => allTags.add(tag));
+                }
+            });
+
+            // 生成Markdown
+            let markdown = `---
+date: ${dateStr}
+weekday: 星期${weekday}
+mood: ${state.mood}/5
+energy: ${state.energy}/5
+tags: [${Array.from(allTags).join(', ')}]
+total_time: ${totalHours}h${remainingMinutes > 0 ? remainingMinutes + 'm' : ''}
+---
+
+# ${dateStr} 星期${weekday} 每日记录
+
+## ⏰ 时间记录
+
+| 时间 | 活动 | 时长 |
+|------|------|------|
+`;
+
+            // 时间块表格
+            state.timeBlocks.forEach(block => {
+                if (block.startTime && block.endTime && block.activity) {
+                    const duration = calculateDuration(block.startTime, block.endTime);
+                    markdown += `| ${block.startTime}-${block.endTime} | ${block.activity} | ${duration} |\n`;
+                }
+            });
+
+            markdown += `
+总计：${totalHours}小时${remainingMinutes > 0 ? remainingMinutes + '分钟' : ''}
+
+## ✅ 今日任务
+
+`;
+
+            // 任务列表
+            state.tasks.forEach(task => {
+                const status = task.completed ? '✅' : '⬜';
+                markdown += `- ${status} ${task.text}\n`;
+            });
+
+            markdown += `
+## 📊 状态评估
+
+- **情绪**: ${state.mood}/5 ${getMoodEmoji(state.mood)}
+- **精力**: ${state.energy}/5 ${getEnergyEmoji(state.energy)}
+
+## 📝 笔记与反思
+
+${notesTextEl.value}
+
+---
+
+*记录时间: ${now.toLocaleString('zh-CN')}*
+`;
+
+            return markdown;
+        }
+
+        // 计算时长
+        function calculateDuration(start, end) {
+            const [startH, startM] = start.split(':').map(Number);
+            const [endH, endM] = end.split(':').map(Number);
+            const minutes = (endH * 60 + endM) - (startH * 60 + startM);
+            if (minutes <= 0) return '0m';
+
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+
+            if (hours > 0 && mins > 0) {
+                return `${hours}h${mins}m`;
+            } else if (hours > 0) {
+                return `${hours}h`;
+            } else {
+                return `${mins}m`;
+            }
+        }
+
+        // 获取情绪emoji
+        function getMoodEmoji(level) {
+            const emojis = ['😞', '😐', '😊', '😄', '🤩'];
+            return emojis[level - 1] || '😐';
+        }
+
+        // 获取精力emoji
+        function getEnergyEmoji(level) {
+            const emojis = ['😴', '😌', '🙂', '💪', '⚡'];
+            return emojis[level - 1] || '🙂';
+        }
+
+        // 保存到本地（localStorage）
+        function saveToLocal() {
+            saveToStorage();
+            alert('数据已保存到浏览器本地存储！');
+        }
+
+        // 清空数据
+        function clearData() {
+            if (confirm('确定要清空今天的所有数据吗？此操作不可撤销！')) {
+                // 重置状态
+                state.timeBlocks = [];
+                state.tasks = [];
+                state.notes = '';
+                state.mood = 3;
+                state.energy = 3;
+                state.selectedTags = [];
+                state.selectedTimeBlockId = null;
+
+                // 从按日期存储的数据中删除今天的记录
+                const todayKey = getTodayKey();
+                const allData = getAllData();
+                delete allData[todayKey]; // 删除今天的数据
+                saveAllData(allData);
+
+                // 更新UI
+                renderTimeBlocks();
+                renderTimeAxis();
+                renderTasks();
+                notesTextEl.value = '';
+                setRatingSelection(moodButtons, 3);
+                setRatingSelection(energyButtons, 3);
+
+                // 添加一个默认时间块和任务
+                addTimeBlock('09:00', '10:30', '');
+                addTask('示例任务，点击编辑');
+
+                alert('今天的数据已清空！已恢复默认状态。');
+            }
+        }
+
+        // 导出为Markdown文件
+        function exportToMarkdown() {
+            const markdown = generateMarkdown();
+            const now = state.date;
+            const dateStr = now.toISOString().split('T')[0];
+            const filename = `每日记录-${dateStr}.md`;
+
+            // 创建Blob并下载
+            const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // 同时保存到localStorage
+            saveToStorage();
+
+            alert(`Markdown文件已下载：${filename}\n\n请将此文件复制到你的Obsidian vault目录中。`);
+        }
+
+        // 设置事件监听
+        function setupEventListeners() {
+            // 添加时间块按钮
+            addTimeBlockBtn.addEventListener('click', () => addTimeBlock());
+
+            // 切换视图按钮
+            toggleViewBtn.addEventListener('click', toggleView);
+
+            // 添加任务按钮
+            addTaskBtn.addEventListener('click', () => addTask());
+
+            // 保存按钮
+            saveBtn.addEventListener('click', saveToLocal);
+
+            // 导出按钮
+            exportBtn.addEventListener('click', exportToMarkdown);
+
+            // 加载模板按钮
+            loadTemplateBtn.addEventListener('click', () => {
+                // 简单提示
+                alert('请选择下方的模板按钮加载预设模板');
+            });
+
+            // 情绪按钮
+            moodButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const value = parseInt(btn.getAttribute('data-value'));
+                    state.mood = value;
+                    setRatingSelection(moodButtons, value);
+                    saveToStorage();
+                });
+            });
+
+            // 精力按钮
+            energyButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const value = parseInt(btn.getAttribute('data-value'));
+                    state.energy = value;
+                    setRatingSelection(energyButtons, value);
+                    saveToStorage();
+                });
+            });
+
+            // 模板按钮
+            templateButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const template = btn.getAttribute('data-template');
+
+                    // 更新按钮状态
+                    templateButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // 加载模板
+                    loadTemplate(template);
+                });
+            });
+
+            // 颜色标签 - 应用到选中的时间块
+            colorTags.forEach(tag => {
+                tag.addEventListener('click', () => {
+                    const tagName = tag.getAttribute('data-tag');
+                    applyTagToSelectedTimeBlock(tagName);
+                });
+            });
+
+            // 清空数据按钮
+            document.getElementById('clearBtn').addEventListener('click', clearData);
+
+            // 笔记自动保存
+            notesTextEl.addEventListener('input', () => {
+                saveToStorage();
+            });
+        }
+
+        // 番茄钟功能
+        const pomodoroState = {
+            isRunning: false,
+            isPaused: false,
+            isBreak: false,
+            workTime: 25 * 60, // 25分钟，单位秒
+            breakTime: 5 * 60, // 5分钟，单位秒
+            timeLeft: 25 * 60,
+            timerInterval: null,
+            completedCount: 0,
+            startTime: null,
+            endTime: null,
+            taskName: ''  // 番茄钟任务名称
+        };
+
+        // DOM元素
+        const pomodoroTimerEl = document.getElementById('pomodoroTimer');
+        const pomodoroStatusEl = document.getElementById('pomodoroStatus');
+        const pomodoroPhaseEl = document.getElementById('pomodoroPhase');
+        const pomodoroProgressEl = document.getElementById('pomodoroProgress');
+        const pomodoroCompletedEl = document.getElementById('pomodoroCompleted');
+        const pomodoroNextEl = document.getElementById('pomodoroNext');
+        const pomodoroStartBtn = document.getElementById('pomodoroStartBtn');
+        const pomodoroPauseBtn = document.getElementById('pomodoroPauseBtn');
+        const pomodoroResetBtn = document.getElementById('pomodoroResetBtn');
+        const pomodoroPanel = document.querySelector('.pomodoro-panel');
+        const pomodoroTaskNameEl = document.getElementById('pomodoroTaskName');
+
+        // 格式化时间
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // 更新显示
+        function updatePomodoroDisplay() {
+            pomodoroTimerEl.textContent = formatTime(pomodoroState.timeLeft);
+            pomodoroCompletedEl.textContent = pomodoroState.completedCount;
+
+            if (pomodoroState.isRunning) {
+                pomodoroStatusEl.textContent = pomodoroState.isBreak ? '休息中...' : '工作中...';
+                pomodoroPhaseEl.textContent = pomodoroState.isBreak ?
+                    `休息 (${pomodoroState.breakTime / 60}分钟)` :
+                    `工作 (${pomodoroState.workTime / 60}分钟)`;
+                pomodoroNextEl.textContent = pomodoroState.isBreak ?
+                    '工作 (25分钟)' : '休息 (5分钟)';
+
+                // 更新进度条
+                const totalTime = pomodoroState.isBreak ? pomodoroState.breakTime : pomodoroState.workTime;
+                const progress = ((totalTime - pomodoroState.timeLeft) / totalTime) * 100;
+                pomodoroProgressEl.style.width = `${progress}%`;
+                pomodoroProgressEl.style.background = pomodoroState.isBreak ? '#3498db' : '#2ecc71';
+
+                // 更新面板样式
+                pomodoroPanel.classList.remove('running', 'break');
+                pomodoroPanel.classList.add(pomodoroState.isBreak ? 'break' : 'running');
+            } else {
+                pomodoroStatusEl.textContent = pomodoroState.isPaused ? '已暂停' : '准备开始';
+                pomodoroPhaseEl.textContent = pomodoroState.isBreak ?
+                    `休息 (${pomodoroState.breakTime / 60}分钟)` :
+                    `工作 (${pomodoroState.workTime / 60}分钟)`;
+                pomodoroNextEl.textContent = pomodoroState.isBreak ?
+                    '工作 (25分钟)' : '休息 (5分钟)';
+                pomodoroPanel.classList.remove('running', 'break');
+            }
+
+            // 按钮状态
+            pomodoroStartBtn.style.display = pomodoroState.isRunning && !pomodoroState.isPaused ? 'none' : 'flex';
+            pomodoroPauseBtn.style.display = pomodoroState.isRunning && !pomodoroState.isPaused ? 'flex' : 'none';
+        }
+
+        // 番茄钟完成
+        function pomodoroComplete() {
+            clearInterval(pomodoroState.timerInterval);
+            pomodoroState.isRunning = false;
+            pomodoroState.isPaused = false;
+
+            // 记录时间块
+            recordPomodoroTimeBlock();
+
+            // 增加完成计数
+            if (!pomodoroState.isBreak) {
+                pomodoroState.completedCount++;
+            }
+
+            // 切换工作/休息状态
+            pomodoroState.isBreak = !pomodoroState.isBreak;
+            pomodoroState.timeLeft = pomodoroState.isBreak ? pomodoroState.breakTime : pomodoroState.workTime;
+
+            // 显示完成消息
+            const message = pomodoroState.isBreak ?
+                '🍅 工作完成！开始5分钟休息。' :
+                '✅ 休息结束！准备开始下一个工作周期。';
+            alert(message);
+
+            // 自动开始下一个周期
+            setTimeout(() => {
+                if (confirm(pomodoroState.isBreak ?
+                    '开始5分钟休息吗？点击"取消"手动控制。' :
+                    '开始25分钟工作吗？点击"取消"手动控制。')) {
+                    startPomodoro();
+                } else {
+                    updatePomodoroDisplay();
+                }
+            }, 500);
+        }
+
+        // 记录时间块
+        function recordPomodoroTimeBlock() {
+            if (!pomodoroState.startTime || !pomodoroState.endTime) return;
+
+            const startTime = new Date(pomodoroState.startTime);
+            const endTime = new Date(pomodoroState.endTime);
+
+            // 格式化为HH:MM
+            const startStr = startTime.getHours().toString().padStart(2, '0') + ':' +
+                           startTime.getMinutes().toString().padStart(2, '0');
+            const endStr = endTime.getHours().toString().padStart(2, '0') + ':' +
+                          endTime.getMinutes().toString().padStart(2, '0');
+
+            // 活动名称：如果设置了任务名称则使用，否则使用默认名称
+            let activity = '';
+            if (pomodoroState.taskName && pomodoroState.taskName.trim() !== '') {
+                activity = pomodoroState.taskName.trim();
+                if (pomodoroState.isBreak) {
+                    activity += ' (休息)';
+                }
+            } else {
+                activity = pomodoroState.isBreak ? '番茄钟休息' : '番茄钟工作';
+            }
+
+            // 添加时间块
+            addTimeBlock(startStr, endStr, activity, [pomodoroState.isBreak ? '休息' : '工作']);
+
+            // 重置时间记录
+            pomodoroState.startTime = null;
+            pomodoroState.endTime = null;
+            pomodoroState.taskName = '';
+        }
+
+        // 开始番茄钟
+        function startPomodoro() {
+            if (pomodoroState.isRunning && pomodoroState.isPaused) {
+                // 恢复暂停
+                pomodoroState.isPaused = false;
+            } else {
+                // 新的开始
+                pomodoroState.isRunning = true;
+                pomodoroState.isPaused = false;
+                pomodoroState.startTime = new Date();
+                pomodoroState.timeLeft = pomodoroState.isBreak ? pomodoroState.breakTime : pomodoroState.workTime;
+                // 保存任务名称
+                pomodoroState.taskName = pomodoroTaskNameEl ? pomodoroTaskNameEl.value.trim() : '';
+            }
+
+            // 设置结束时间
+            pomodoroState.endTime = new Date(Date.now() + pomodoroState.timeLeft * 1000);
+
+            // 启动计时器
+            clearInterval(pomodoroState.timerInterval);
+            pomodoroState.timerInterval = setInterval(() => {
+                pomodoroState.timeLeft--;
+                updatePomodoroDisplay();
+
+                if (pomodoroState.timeLeft <= 0) {
+                    pomodoroComplete();
+                }
+
+                // 最后10秒闪烁提醒
+                if (pomodoroState.timeLeft <= 10) {
+                    pomodoroTimerEl.classList.add('alert');
+                } else {
+                    pomodoroTimerEl.classList.remove('alert');
+                }
+            }, 1000);
+
+            updatePomodoroDisplay();
+        }
+
+        // 暂停番茄钟
+        function pausePomodoro() {
+            pomodoroState.isPaused = true;
+            clearInterval(pomodoroState.timerInterval);
+            updatePomodoroDisplay();
+        }
+
+        // 重置番茄钟
+        function resetPomodoro() {
+            clearInterval(pomodoroState.timerInterval);
+            pomodoroState.isRunning = false;
+            pomodoroState.isPaused = false;
+            pomodoroState.isBreak = false;
+            pomodoroState.timeLeft = pomodoroState.workTime;
+            pomodoroState.startTime = null;
+            pomodoroState.endTime = null;
+            pomodoroState.taskName = '';
+            updatePomodoroDisplay();
+        }
+
+        // 初始化番茄钟
+        function initPomodoro() {
+            updatePomodoroDisplay();
+
+            // 事件监听
+            pomodoroStartBtn.addEventListener('click', startPomodoro);
+            pomodoroPauseBtn.addEventListener('click', pausePomodoro);
+            pomodoroResetBtn.addEventListener('click', resetPomodoro);
+
+            // 允许调整工作时间
+            const workTimeEl = document.getElementById('pomodoroWorkTime');
+            const restTimeEl = document.getElementById('pomodoroRestTime');
+
+            if (workTimeEl) {
+                workTimeEl.addEventListener('click', () => {
+                    const newTime = prompt('输入工作时间（分钟）:', pomodoroState.workTime / 60);
+                    if (newTime && !isNaN(newTime) && newTime > 0) {
+                        pomodoroState.workTime = parseInt(newTime) * 60;
+                        if (!pomodoroState.isRunning && !pomodoroState.isBreak) {
+                            pomodoroState.timeLeft = pomodoroState.workTime;
+                        }
+                        workTimeEl.textContent = newTime;
+                        updatePomodoroDisplay();
+                    }
+                });
+            }
+
+            if (restTimeEl) {
+                restTimeEl.addEventListener('click', () => {
+                    const newTime = prompt('输入休息时间（分钟）:', pomodoroState.breakTime / 60);
+                    if (newTime && !isNaN(newTime) && newTime > 0) {
+                        pomodoroState.breakTime = parseInt(newTime) * 60;
+                        if (!pomodoroState.isRunning && pomodoroState.isBreak) {
+                            pomodoroState.timeLeft = pomodoroState.breakTime;
+                        }
+                        restTimeEl.textContent = newTime;
+                        updatePomodoroDisplay();
+                    }
+                });
+            }
+        }
+
+        // 初始化应用
+        window.addEventListener('DOMContentLoaded', init);
+
+        // 暴露函数到全局作用域供内联事件使用
+        window.updateTimeBlock = updateTimeBlock;
+        window.removeTimeBlock = removeTimeBlock;
+        window.updateTask = updateTask;
+        window.removeTask = removeTask;
+    </script>
+</body>
+</html>
