@@ -574,119 +574,6 @@
         .tag-exercise { background: #55efc4; color: #00b894; }
         .tag-social { background: #fd79a8; color: #e84393; }
         .tag-other { background: #dfe6e9; color: #636e72; }
-
-        /* 苦强指数模块样式 */
-        .strengthening-section,
-        .suffering-section {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .option-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 8px;
-            background: #f8f9fa;
-            border-radius: 4px;
-            border: 1px solid #e9ecef;
-        }
-
-        .option-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-        }
-
-        .option-item input[type="number"] {
-            flex: 0 0 80px;
-            padding: 6px 8px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            text-align: right;
-            font-size: 0.95rem;
-        }
-
-        .option-item label {
-            flex: 1;
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
-
-        .option-item span {
-            font-size: 0.95rem;
-            color: #7f8c8d;
-        }
-
-        .score-display,
-        .total-display {
-            text-align: right;
-            font-weight: 600;
-            color: #3498db;
-            margin-top: 8px;
-        }
-
-        .time-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin: 12px 0;
-        }
-
-        .time-input {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .time-input label {
-            width: 80px;
-            font-weight: 500;
-        }
-
-        .time-input input {
-            flex: 1;
-            padding: 6px 8px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            text-align: right;
-        }
-
-        .index-section {
-            padding: 12px;
-            text-align: center;
-        }
-
-        #calculateIndexBtn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        #calculateIndexBtn:hover {
-            background: #2980b9;
-        }
-
-        .index-result {
-            margin-top: 16px;
-            padding: 12px;
-            background: #e8f4fc;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
     </style>
 </head>
 <body>
@@ -849,55 +736,43 @@
             <textarea class="notes-textarea" id="notesText" placeholder="记录今天的想法、收获、反思..."></textarea>
         </div>
 
-        <!-- 苦强指数评估 -->
+        <!-- 情绪与精力 -->
         <div class="card mood-energy">
             <div class="card-header">
                 <div class="card-title">
-                    <span class="icon">📊</span> 人生密度评估
+                    <span class="icon">😊</span> 状态评估
+                </div>
+            </div>
+            <div class="mood-energy-grid">
+                <div class="rating-section">
+                    <div class="rating-title">情绪</div>
+                    <div class="rating-buttons" id="moodButtons">
+                        <button class="rating-btn" data-value="1">😞 差</button>
+                        <button class="rating-btn" data-value="2">😐 一般</button>
+                        <button class="rating-btn" data-value="3">😊 好</button>
+                        <button class="rating-btn" data-value="4">😄 很好</button>
+                        <button class="rating-btn" data-value="5">🤩 极好</button>
+                    </div>
+                </div>
+                <div class="rating-section">
+                    <div class="rating-title">精力</div>
+                    <div class="rating-buttons" id="energyButtons">
+                        <button class="rating-btn" data-value="1">😴 低</button>
+                        <button class="rating-btn" data-value="2">😌 中低</button>
+                        <button class="rating-btn" data-value="3">🙂 中等</button>
+                        <button class="rating-btn" data-value="4">💪 充沛</button>
+                        <button class="rating-btn" data-value="5">⚡ 旺盛</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- 变强评估部分 -->
-            <div class="strengthening-section">
-                <div class="options-list" id="strengtheningOptions">
-                    <!-- 选项将通过JavaScript动态生成 -->
-                </div>
-
-                <div class="score-display">
-                    变强得分：<span id="strengtheningScore">0</span>分
-                </div>
-            </div>
-
-            <!-- 吃苦评估部分 -->
-            <div class="suffering-section">
-                <div class="time-inputs">
-                    <div class="time-input">
-                        <label>坐班时长</label>
-                        <input type="number" id="officeHours" min="0" max="24" step="0.5" value="0">
-                        <span>小时</span>
-                    </div>
-                    <div class="time-input">
-                        <label>通勤时长</label>
-                        <input type="number" id="commuteHours" min="0" max="24" step="0.5" value="0">
-                        <span>小时</span>
-                    </div>
-                    <div class="time-input">
-                        <label>家务时长</label>
-                        <input type="number" id="houseworkHours" min="0" max="24" step="0.5" value="0">
-                        <span>小时</span>
-                    </div>
-                </div>
-
-                <div class="total-display">
-                    总吃苦时长：<span id="totalSufferingHours">0</span>小时
-                </div>
-            </div>
-
-            <!-- 指数查看部分 -->
-            <div class="index-section">
-                <button id="calculateIndexBtn">查看人生密度指数</button>
-                <div id="indexResult" class="index-result" style="display: none;">
-                    人生密度指数：<span id="kuQiangIndexValue">0</span>
+            <div class="template-selector">
+                <div style="font-weight: 600; margin-bottom: 8px; color: #2c3e50;">每日模板：</div>
+                <div class="template-buttons">
+                    <button class="template-btn" data-template="default">默认模板</button>
+                    <button class="template-btn" data-template="work">工作日志</button>
+                    <button class="template-btn" data-template="study">学习日志</button>
+                    <button class="template-btn" data-template="creative">创意日志</button>
                 </div>
             </div>
         </div>
@@ -915,38 +790,12 @@
             timeBlocks: [],
             tasks: [],
             notes: '',
-            // 苦强指数数据
-            kuQiangData: {
-                // 变强评估数据
-                strengthening: {
-                    scores: [0, 0, 0, 0, 0, 0, 0], // 每个选项的分数值
-                    score: 0 // 当前总得分
-                },
-                // 吃苦评估数据
-                suffering: {
-                    officeHours: 0,   // 坐班时长（小时）
-                    commuteHours: 0,  // 通勤时长（小时）
-                    houseworkHours: 0, // 家务时长（小时）
-                    totalHours: 0     // 总吃苦时长
-                },
-                // 最终指数
-                kuQiangIndex: 0
-            },
+            mood: 3,
+            energy: 3,
             selectedTags: [],
             selectedTimeBlockId: null,  // 当前选中的时间块ID
             viewMode: 'list'  // 'list' 或 'timeline'
         };
-
-        // 苦强指数配置
-        const strengtheningOptions = [
-            { id: 1, text: "学到一个有用的知识点并付诸实践", score: 10 },
-            { id: 2, text: "学会一个新方法or技术", score: 15 },
-            { id: 3, text: "找到一个新客户", score: 20 },
-            { id: 4, text: "认识一个厉害的人", score: 12 },
-            { id: 5, text: "获得一笔超额回报（是时薪的3倍）", score: 25 },
-            { id: 6, text: "主动向领导汇报一次", score: 8 },
-            { id: 7, text: "以上都没有", score: 0, exclusive: true }
-        ];
 
         // 辅助函数
         function getTodayKey() {
@@ -963,278 +812,6 @@
             localStorage.setItem('efficiencyTrackerAllData', JSON.stringify(allData));
         }
 
-        // ============================================
-        // 苦强指数功能函数
-        // ============================================
-
-        // 苦强指数计算函数
-        function calculateKuQiangIndex() {
-            const { strengthening, suffering } = state.kuQiangData;
-
-            // 1. 计算变强得分
-            let strengtheningScore = 0;
-            // 计算所有选项的分数总和
-            for (let i = 0; i < strengthening.scores.length; i++) {
-                strengtheningScore += strengthening.scores[i] || 0;
-            }
-
-            // 2. 计算人生密度指数：变强得分 / 总吃苦时长
-            const totalSuffering = suffering.totalHours;
-            let kuQiangIndex = 0;
-
-            if (totalSuffering === 0) {
-                // 没有吃苦，指数等于变强得分
-                kuQiangIndex = strengtheningScore;
-            } else {
-                // 计算得分与吃苦时长的比值
-                kuQiangIndex = strengtheningScore / totalSuffering;
-                // 保留一位小数
-                kuQiangIndex = Math.round(kuQiangIndex * 10) / 10;
-            }
-
-            // 3. 更新状态
-            state.kuQiangData.strengthening.score = strengtheningScore;
-            state.kuQiangData.kuQiangIndex = kuQiangIndex;
-
-            return kuQiangIndex;
-        }
-
-        // 更新变强得分显示
-        function updateStrengtheningScore() {
-            calculateKuQiangIndex();
-            const scoreEl = document.getElementById('strengtheningScore');
-            if (scoreEl) {
-                scoreEl.textContent = state.kuQiangData.strengthening.score;
-            }
-        }
-
-        // 更新总吃苦时长
-        function updateTotalSufferingHours() {
-            const { officeHours, commuteHours, houseworkHours } = state.kuQiangData.suffering;
-            const total = officeHours + commuteHours + houseworkHours;
-
-            state.kuQiangData.suffering.totalHours = total;
-
-            const totalEl = document.getElementById('totalSufferingHours');
-            if (totalEl) {
-                totalEl.textContent = total.toFixed(1);
-            }
-        }
-
-        // 渲染变强选项
-        function renderStrengtheningOptions() {
-            const container = document.getElementById('strengtheningOptions');
-            if (!container) return;
-
-            container.innerHTML = '';
-
-            strengtheningOptions.forEach((option, index) => {
-                const optionEl = document.createElement('div');
-                optionEl.className = 'option-item';
-
-                if (index === 6) { // "以上都没有" - 复选框
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `strength_opt_${index}`;
-                    checkbox.value = index;
-                    checkbox.checked = state.kuQiangData.strengthening.scores[index] === 0 &&
-                                      state.kuQiangData.strengthening.scores.slice(0, 6).every(score => score === 0);
-                    checkbox.addEventListener('change', handleNoneOptionChange);
-
-                    const label = document.createElement('label');
-                    label.htmlFor = `strength_opt_${index}`;
-                    label.textContent = option.text;
-
-                    optionEl.appendChild(checkbox);
-                    optionEl.appendChild(label);
-                } else { // 其他选项 - 数字输入框
-                    const label = document.createElement('label');
-                    label.textContent = option.text;
-                    label.htmlFor = `strength_score_${index}`;
-
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.id = `strength_score_${index}`;
-                    input.min = 0;
-                    input.max = 100;
-                    input.step = 1;
-                    input.value = state.kuQiangData.strengthening.scores[index];
-                    input.addEventListener('input', handleStrengtheningScoreChange);
-                    input.addEventListener('change', handleStrengtheningScoreChange);
-
-                    const unit = document.createElement('span');
-                    unit.textContent = '分';
-
-                    optionEl.appendChild(label);
-                    optionEl.appendChild(input);
-                    optionEl.appendChild(unit);
-                }
-
-                container.appendChild(optionEl);
-            });
-        }
-
-        // 变强选项分数变化处理
-        function handleStrengtheningScoreChange(e) {
-            const inputId = e.target.id;
-            const index = parseInt(inputId.replace('strength_score_', ''));
-            const value = parseInt(e.target.value) || 0;
-
-            // 更新分数
-            state.kuQiangData.strengthening.scores[index] = value;
-
-            // 如果设置了任何正分数，取消"以上都没有"的选择
-            if (value > 0) {
-                const noneCheckbox = document.querySelector('#strengtheningOptions input[type="checkbox"]');
-                if (noneCheckbox) {
-                    noneCheckbox.checked = false;
-                }
-            }
-
-            updateStrengtheningScore();
-            saveToStorage();
-        }
-
-        // "以上都没有"选项变化处理
-        function handleNoneOptionChange(e) {
-            const isChecked = e.target.checked;
-
-            if (isChecked) {
-                // 将所有其他选项分数设为0
-                for (let i = 0; i < 6; i++) {
-                    state.kuQiangData.strengthening.scores[i] = 0;
-                    const input = document.getElementById(`strength_score_${i}`);
-                    if (input) {
-                        input.value = 0;
-                    }
-                }
-            }
-
-            updateStrengtheningScore();
-            saveToStorage();
-        }
-
-        // 吃苦时间变化处理
-        function handleSufferingTimeChange() {
-            const officeHours = parseFloat(document.getElementById('officeHours').value) || 0;
-            const commuteHours = parseFloat(document.getElementById('commuteHours').value) || 0;
-            const houseworkHours = parseFloat(document.getElementById('houseworkHours').value) || 0;
-
-            state.kuQiangData.suffering.officeHours = officeHours;
-            state.kuQiangData.suffering.commuteHours = commuteHours;
-            state.kuQiangData.suffering.houseworkHours = houseworkHours;
-
-            updateTotalSufferingHours();
-            saveToStorage();
-        }
-
-        // 计算并显示苦强指数
-        function calculateAndShowKuQiangIndex() {
-            const index = calculateKuQiangIndex();
-            const resultEl = document.getElementById('indexResult');
-            const valueEl = document.getElementById('kuQiangIndexValue');
-
-            if (resultEl && valueEl) {
-                let evaluation = '';
-                if (index >= 80) {
-                    evaluation = '（非常出色！）';
-                    valueEl.style.color = '#27ae60';
-                } else if (index >= 60) {
-                    evaluation = '（表现良好）';
-                    valueEl.style.color = '#f39c12';
-                } else if (index >= 40) {
-                    evaluation = '（还需努力）';
-                    valueEl.style.color = '#e67e22';
-                } else {
-                    evaluation = '（加油改进）';
-                    valueEl.style.color = '#e74c3c';
-                }
-
-                valueEl.textContent = `${index} ${evaluation}`;
-                resultEl.style.display = 'block';
-            }
-        }
-
-        // 加载苦强数据
-        function loadKuQiangData() {
-            const todayKey = getTodayKey();
-            const allData = getAllData();
-            const todayData = allData[todayKey];
-
-            if (todayData && todayData.kuQiangData) {
-                state.kuQiangData = todayData.kuQiangData;
-
-                // 数据迁移：如果存在旧的selections格式，转换为新的scores格式
-                if (state.kuQiangData.strengthening && state.kuQiangData.strengthening.selections && !state.kuQiangData.strengthening.scores) {
-                    // 初始化scores数组
-                    state.kuQiangData.strengthening.scores = [0, 0, 0, 0, 0, 0, 0];
-
-                    // 将选中的选项转换为分数（使用配置的默认分数）
-                    const selections = state.kuQiangData.strengthening.selections;
-                    if (selections.length > 0 && !selections.includes(6)) { // 不是"以上都没有"
-                        selections.forEach(optionIndex => {
-                            if (optionIndex < strengtheningOptions.length) {
-                                state.kuQiangData.strengthening.scores[optionIndex] = strengtheningOptions[optionIndex].score;
-                            }
-                        });
-                    }
-
-                    // 删除旧的字段
-                    delete state.kuQiangData.strengthening.selections;
-                    delete state.kuQiangData.strengthening.inputValue;
-
-                    // 保存迁移后的数据
-                    saveToStorage();
-                }
-
-                // 确保scores数组存在且长度正确
-                if (!state.kuQiangData.strengthening.scores || state.kuQiangData.strengthening.scores.length !== 7) {
-                    state.kuQiangData.strengthening.scores = [0, 0, 0, 0, 0, 0, 0];
-                }
-
-                // 渲染变强选项
-                renderStrengtheningOptions();
-
-                document.getElementById('officeHours').value = state.kuQiangData.suffering.officeHours;
-                document.getElementById('commuteHours').value = state.kuQiangData.suffering.commuteHours;
-                document.getElementById('houseworkHours').value = state.kuQiangData.suffering.houseworkHours;
-
-                updateStrengtheningScore();
-                updateTotalSufferingHours();
-            } else {
-                // 今天没有数据，确保选项被渲染
-                renderStrengtheningOptions();
-            }
-        }
-
-        // 设置事件监听器
-        function setupKuQiangEventListeners() {
-            // 吃苦时间输入
-            const timeInputs = ['officeHours', 'commuteHours', 'houseworkHours'];
-            timeInputs.forEach(inputId => {
-                const input = document.getElementById(inputId);
-                if (input) {
-                    input.addEventListener('input', handleSufferingTimeChange);
-                    input.addEventListener('change', handleSufferingTimeChange);
-                }
-            });
-
-            // 指数计算按钮
-            const calculateBtn = document.getElementById('calculateIndexBtn');
-            if (calculateBtn) {
-                calculateBtn.addEventListener('click', calculateAndShowKuQiangIndex);
-            }
-        }
-
-        // 初始化苦强模块
-        function initKuQiangModule() {
-            setupKuQiangEventListeners();
-            loadKuQiangData();
-            updateStrengtheningScore();
-            updateTotalSufferingHours();
-        }
-
-        // ============================================
         // 迁移旧数据
         function migrateOldData() {
             const oldData = localStorage.getItem('efficiencyTrackerData');
@@ -1249,11 +826,8 @@
                             timeBlocks: data.timeBlocks || [],
                             tasks: data.tasks || [],
                             notes: data.notes || '',
-                            kuQiangData: {
-                                strengthening: { selections: [], score: 0 },
-                                suffering: { officeHours: 0, commuteHours: 0, houseworkHours: 0, totalHours: 0 },
-                                kuQiangIndex: 0
-                            },
+                            mood: data.mood || 3,
+                            energy: data.energy || 3,
                             viewMode: data.viewMode || 'list',
                             lastSaved: data.lastSaved || new Date().toISOString()
                         };
@@ -1275,12 +849,15 @@
         const timeAxisGridEl = document.getElementById('timeAxisGrid');
         const taskListEl = document.getElementById('taskList');
         const notesTextEl = document.getElementById('notesText');
+        const moodButtons = document.querySelectorAll('#moodButtons .rating-btn');
+        const energyButtons = document.querySelectorAll('#energyButtons .rating-btn');
         const addTimeBlockBtn = document.getElementById('addTimeBlockBtn');
         const toggleViewBtn = document.getElementById('toggleViewBtn');
         const addTaskBtn = document.getElementById('addTaskBtn');
         const saveBtn = document.getElementById('saveBtn');
         const exportBtn = document.getElementById('exportBtn');
         const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+        const templateButtons = document.querySelectorAll('.template-btn');
         const colorTags = document.querySelectorAll('.color-tag');
 
         // 初始化
@@ -1312,8 +889,9 @@
             renderTimeAxis();
             renderTasks();
 
-            // 初始化苦强指数模块
-            initKuQiangModule();
+            // 设置选中状态
+            setRatingSelection(moodButtons, state.mood);
+            setRatingSelection(energyButtons, state.energy);
 
             // 初始化番茄钟
             initPomodoro();
@@ -1719,6 +1297,20 @@
         }
 
         // 设置评分选择
+        function setRatingSelection(buttons, value) {
+            buttons.forEach(btn => {
+                const btnValue = parseInt(btn.getAttribute('data-value'));
+                if (btnValue === value) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        // 不再使用
+
+        // 不再使用
 
         // 保存到localStorage
         function saveToStorage() {
@@ -1729,7 +1321,8 @@
                 timeBlocks: state.timeBlocks,
                 tasks: state.tasks,
                 notes: notesTextEl.value,
-                kuQiangData: state.kuQiangData,
+                mood: state.mood,
+                energy: state.energy,
                 viewMode: state.viewMode,
                 lastSaved: new Date().toISOString()
             };
@@ -1750,12 +1343,9 @@
                 state.timeBlocks = todayData.timeBlocks || [];
                 state.tasks = todayData.tasks || [];
                 state.notes = todayData.notes || '';
+                state.mood = todayData.mood || 3;
+                state.energy = todayData.energy || 3;
                 state.viewMode = todayData.viewMode || 'list';
-
-                // 加载苦强数据
-                if (todayData.kuQiangData) {
-                    state.kuQiangData = todayData.kuQiangData;
-                }
 
                 // 确保每个时间块都有tags数组
                 state.timeBlocks.forEach(block => {
@@ -1764,6 +1354,8 @@
 
                 // 更新UI
                 notesTextEl.value = state.notes;
+                setRatingSelection(moodButtons, state.mood);
+                setRatingSelection(energyButtons, state.energy);
             } else {
                 // 今天没有数据，初始化默认状态（UI已默认）
                 console.log('今天没有历史数据，初始化新的一天');
@@ -1818,31 +1410,16 @@
                     break;
             }
 
-            // 重置苦强数据
-            state.kuQiangData.strengthening.scores = [0, 0, 0, 0, 0, 0, 0];
-            state.kuQiangData.strengthening.score = 0;
-            state.kuQiangData.suffering.officeHours = 0;
-            state.kuQiangData.suffering.commuteHours = 0;
-            state.kuQiangData.suffering.houseworkHours = 0;
-            state.kuQiangData.suffering.totalHours = 0;
-            state.kuQiangData.kuQiangIndex = 0;
+            // 更新UI状态
+            state.mood = 3;
+            state.energy = 3;
+            setRatingSelection(moodButtons, 3);
+            setRatingSelection(energyButtons, 3);
 
             // 渲染
             renderTimeBlocks();
             renderTimeAxis();
             renderTasks();
-
-            // 更新苦强UI
-            document.getElementById('officeHours').value = 0;
-            document.getElementById('commuteHours').value = 0;
-            document.getElementById('houseworkHours').value = 0;
-            updateStrengtheningScore();
-            updateTotalSufferingHours();
-
-            // 隐藏指数结果
-            const resultEl = document.getElementById('indexResult');
-            if (resultEl) resultEl.style.display = 'none';
-
             saveToStorage();
         }
 
@@ -1873,14 +1450,12 @@
                 }
             });
 
-            // 获取苦强数据
-            const kuQiangData = state.kuQiangData;
-
             // 生成Markdown
             let markdown = `---
 date: ${dateStr}
 weekday: 星期${weekday}
-kuqiang_index: ${kuQiangData.kuQiangIndex}
+mood: ${state.mood}/5
+energy: ${state.energy}/5
 tags: [${Array.from(allTags).join(', ')}]
 total_time: ${totalHours}h${remainingMinutes > 0 ? remainingMinutes + 'm' : ''}
 ---
@@ -1915,47 +1490,10 @@ total_time: ${totalHours}h${remainingMinutes > 0 ? remainingMinutes + 'm' : ''}
             });
 
             markdown += `
-## 📊 人生密度评估
+## 📊 状态评估
 
-### 变强评估
-- **总得分**: ${kuQiangData.strengthening.score}分
-
-`;
-
-            // 显示每个选项的得分
-            let hasPositiveScore = false;
-            strengtheningOptions.forEach((option, index) => {
-                if (index === 6) return; // 跳过"以上都没有"
-                const score = kuQiangData.strengthening.scores[index] || 0;
-                if (score > 0) {
-                    hasPositiveScore = true;
-                    markdown += `  - ${option.text}: ${score}分\n`;
-                }
-            });
-
-            // 如果没有正分数，检查是否选择了"以上都没有"
-            if (!hasPositiveScore) {
-                const noneScore = kuQiangData.strengthening.scores[6] || 0;
-                const noneChecked = noneScore === 0 && kuQiangData.strengthening.scores.slice(0, 6).every(score => score === 0);
-                if (noneChecked) {
-                    markdown += `  - ${strengtheningOptions[6].text}\n`;
-                } else {
-                    markdown += `  - 无项目得分\n`;
-                }
-            }
-
-            markdown += `
-`;
-
-            markdown += `
-### 吃苦评估
-- **坐班时长**: ${kuQiangData.suffering.officeHours}小时
-- **通勤时长**: ${kuQiangData.suffering.commuteHours}小时
-- **家务时长**: ${kuQiangData.suffering.houseworkHours}小时
-- **总吃苦时长**: ${kuQiangData.suffering.totalHours}小时
-
-### 最终指数
-- **人生密度指数**: ${kuQiangData.kuQiangIndex}
+- **情绪**: ${state.mood}/5 ${getMoodEmoji(state.mood)}
+- **精力**: ${state.energy}/5 ${getEnergyEmoji(state.energy)}
 
 ## 📝 笔记与反思
 
@@ -1989,6 +1527,16 @@ ${notesTextEl.value}
         }
 
         // 获取情绪emoji
+        function getMoodEmoji(level) {
+            const emojis = ['😞', '😐', '😊', '😄', '🤩'];
+            return emojis[level - 1] || '😐';
+        }
+
+        // 获取精力emoji
+        function getEnergyEmoji(level) {
+            const emojis = ['😴', '😌', '🙂', '💪', '⚡'];
+            return emojis[level - 1] || '🙂';
+        }
 
         // 保存到本地（localStorage）
         function saveToLocal() {
@@ -2003,17 +1551,10 @@ ${notesTextEl.value}
                 state.timeBlocks = [];
                 state.tasks = [];
                 state.notes = '';
+                state.mood = 3;
+                state.energy = 3;
                 state.selectedTags = [];
                 state.selectedTimeBlockId = null;
-
-                // 重置苦强数据（今日部分）
-                state.kuQiangData.strengthening.scores = [0, 0, 0, 0, 0, 0, 0];
-                state.kuQiangData.strengthening.score = 0;
-                state.kuQiangData.suffering.officeHours = 0;
-                state.kuQiangData.suffering.commuteHours = 0;
-                state.kuQiangData.suffering.houseworkHours = 0;
-                state.kuQiangData.suffering.totalHours = 0;
-                state.kuQiangData.kuQiangIndex = 0;
 
                 // 从按日期存储的数据中删除今天的记录
                 const todayKey = getTodayKey();
@@ -2026,17 +1567,8 @@ ${notesTextEl.value}
                 renderTimeAxis();
                 renderTasks();
                 notesTextEl.value = '';
-
-                // 重置苦强UI
-                document.getElementById('officeHours').value = 0;
-                document.getElementById('commuteHours').value = 0;
-                document.getElementById('houseworkHours').value = 0;
-                updateStrengtheningScore();
-                updateTotalSufferingHours();
-
-                // 隐藏指数结果
-                const resultEl = document.getElementById('indexResult');
-                if (resultEl) resultEl.style.display = 'none';
+                setRatingSelection(moodButtons, 3);
+                setRatingSelection(energyButtons, 3);
 
                 // 添加一个默认时间块和任务
                 addTimeBlock('09:00', '10:30', '');
@@ -2087,9 +1619,44 @@ ${notesTextEl.value}
             // 导出按钮
             exportBtn.addEventListener('click', exportToMarkdown);
 
-            // 加载模板按钮（功能已移除，保留按钮用于提示）
+            // 加载模板按钮
             loadTemplateBtn.addEventListener('click', () => {
-                alert('模板功能已由人生密度评估模块替代。请使用上方的人生密度评估功能。');
+                // 简单提示
+                alert('请选择下方的模板按钮加载预设模板');
+            });
+
+            // 情绪按钮
+            moodButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const value = parseInt(btn.getAttribute('data-value'));
+                    state.mood = value;
+                    setRatingSelection(moodButtons, value);
+                    saveToStorage();
+                });
+            });
+
+            // 精力按钮
+            energyButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const value = parseInt(btn.getAttribute('data-value'));
+                    state.energy = value;
+                    setRatingSelection(energyButtons, value);
+                    saveToStorage();
+                });
+            });
+
+            // 模板按钮
+            templateButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const template = btn.getAttribute('data-template');
+
+                    // 更新按钮状态
+                    templateButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // 加载模板
+                    loadTemplate(template);
+                });
             });
 
             // 颜色标签 - 应用到选中的时间块
