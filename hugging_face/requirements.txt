@@ -1,0 +1,6 @@
+transformers>=4.36.0
+torch
+timm
+pillow
+matplotlib
+gradio
