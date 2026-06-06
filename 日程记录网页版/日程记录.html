@@ -190,7 +190,7 @@
             justify-content: space-between;
             font-size: 0.8rem;
             color: #4a5c6d;
-            padding: 20px 0;
+            padding: 0;
             background: #f8f9fa;
             border-right: 1px solid #d0d7de;
             font-weight: 600;
@@ -230,15 +230,14 @@
             margin-left: 0;
             overflow: hidden;
             height: 100%;
-            min-height: 600px;
+            /* 每 1/18 高度（即每小时）画一条浅色刻度线，与左侧刻度等分对齐 */
             background-image: repeating-linear-gradient(
                 to bottom,
-                transparent,
-                transparent 65px,
-                #f0f3f5 65px,
-                #f0f3f5 66px
+                transparent 0,
+                transparent calc(100% / 18 - 1px),
+                #f0f3f5 calc(100% / 18 - 1px),
+                #f0f3f5 calc(100% / 18)
             );
-            background-position: 0 20px;
         }
 
         .time-block-timeline {
@@ -610,6 +609,12 @@
             color: #7f8c8d;
         }
 
+        .index-result-sub {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #cfe4f3;
+        }
+
         .options-list {
             display: flex;
             flex-direction: column;
@@ -844,9 +849,6 @@
                 <div class="time-axis-grid" id="timeAxisGrid">
                     <!-- 时间块将通过JS动态添加为时间轴条 -->
                 </div>
-                <div style="text-align: center; margin-top: 10px; font-size: 0.85rem; color: #7f8c8d;">
-                    点击并拖动时间块调整位置和时长 | 双击时间块编辑详情
-                </div>
             </div>
 
             <!-- 编辑列表视图 -->
@@ -937,6 +939,8 @@
                 <div id="indexResult" class="index-result" style="display: none;">
                     人生密度：<span id="lifeDensityIndexValue">0</span>
                     <div id="indexResultHint" class="index-result-hint"></div>
+                    <div class="index-result-sub">专注密度：<span id="focusDensityValue">0</span></div>
+                    <div id="focusDensityHint" class="index-result-hint"></div>
                 </div>
             </div>
         </div>
@@ -961,10 +965,12 @@
                 workHours: {
                     transactional: 0,
                     effective: 0,
+                    inefficient: 0,
                     slacking: 0,
                     total: 0
                 },
-                lifeDensityIndex: 0
+                lifeDensityIndex: 0,
+                focusDensity: 0
             },
             // 睡眠数据
             sleepData: {
@@ -999,7 +1005,8 @@
 
         const lifeDensityWorkFields = [
             { key: 'transactional', label: '事务性工作', hint: '兼职、学生工作、日常琐事' },
-            { key: 'effective', label: '有效工作', hint: '专注看论文、写代码、推项目' },
+            { key: 'effective', label: '高效工作', hint: '专注看论文、写代码、推项目' },
+            { key: 'inefficient', label: '低效工作', hint: '边用AI工作边刷手机' },
             { key: 'slacking', label: '摸鱼', hint: '刷手机、游戏、拖延式刷公众号/B站' }
         ];
 
@@ -1010,10 +1017,12 @@
                 workHours: {
                     transactional: 0,
                     effective: 0,
+                    inefficient: 0,
                     slacking: 0,
                     total: 0
                 },
-                lifeDensityIndex: 0
+                lifeDensityIndex: 0,
+                focusDensity: 0
             };
         }
 
@@ -1103,8 +1112,8 @@
             });
             totalScore = Math.round(totalScore * 10) / 10;
 
-            const { transactional, effective, slacking } = state.lifeDensityData.workHours;
-            const totalWorkHours = transactional + effective + slacking;
+            const { transactional, effective, inefficient, slacking } = state.lifeDensityData.workHours;
+            const totalWorkHours = transactional + effective + inefficient + slacking;
             state.lifeDensityData.workHours.total = Math.round(totalWorkHours * 10) / 10;
 
             let lifeDensityIndex = 0;
@@ -1114,10 +1123,17 @@
                 lifeDensityIndex = Math.round((totalScore / totalWorkHours) * 100) / 100;
             }
 
+            // 专注密度 = 高效工作时长 ÷ 总工作时长
+            let focusDensity = 0;
+            if (totalWorkHours > 0) {
+                focusDensity = Math.round((effective / totalWorkHours) * 100) / 100;
+            }
+
             state.lifeDensityData.totalScore = totalScore;
             state.lifeDensityData.lifeDensityIndex = lifeDensityIndex;
+            state.lifeDensityData.focusDensity = focusDensity;
 
-            return { totalScore, totalWorkHours, lifeDensityIndex };
+            return { totalScore, totalWorkHours, lifeDensityIndex, focusDensity };
         }
 
         function updateTotalScoreDisplay() {
@@ -1140,8 +1156,8 @@
         }
 
         function updateTotalWorkHoursDisplay() {
-            const { transactional, effective, slacking } = state.lifeDensityData.workHours;
-            const total = transactional + effective + slacking;
+            const { transactional, effective, inefficient, slacking } = state.lifeDensityData.workHours;
+            const total = transactional + effective + inefficient + slacking;
             state.lifeDensityData.workHours.total = Math.round(total * 10) / 10;
 
             const totalEl = document.getElementById('totalWorkHoursDisplay');
@@ -1284,10 +1300,13 @@
         }
 
         function calculateAndShowLifeDensityIndex() {
-            const { totalScore, totalWorkHours, lifeDensityIndex } = calculateLifeDensityIndex();
+            const { totalScore, totalWorkHours, lifeDensityIndex, focusDensity } = calculateLifeDensityIndex();
             const resultEl = document.getElementById('indexResult');
             const valueEl = document.getElementById('lifeDensityIndexValue');
             const hintEl = document.getElementById('indexResultHint');
+            const focusValueEl = document.getElementById('focusDensityValue');
+            const focusHintEl = document.getElementById('focusDensityHint');
+            const effectiveHours = state.lifeDensityData.workHours.effective;
 
             if (resultEl && valueEl) {
                 valueEl.style.color = '#2c3e50';
@@ -1297,10 +1316,16 @@
                     if (hintEl) {
                         hintEl.textContent = `总得分 ${totalScore.toFixed(1)} 分；未填写工作时长，无法计算密度`;
                     }
+                    if (focusValueEl) focusValueEl.textContent = '—';
+                    if (focusHintEl) focusHintEl.textContent = '未填写工作时长，无法计算专注密度';
                 } else {
                     valueEl.textContent = lifeDensityIndex.toFixed(2);
                     if (hintEl) {
                         hintEl.textContent = `总得分 ${totalScore.toFixed(1)} 分 ÷ 总工作时长 ${totalWorkHours.toFixed(1)} 小时`;
+                    }
+                    if (focusValueEl) focusValueEl.textContent = focusDensity.toFixed(2);
+                    if (focusHintEl) {
+                        focusHintEl.textContent = `高效工作 ${effectiveHours.toFixed(1)} 小时 ÷ 总工作时长 ${totalWorkHours.toFixed(1)} 小时`;
                     }
                 }
 
@@ -1513,7 +1538,7 @@
         // 更新视图显示
         function updateView() {
             if (state.viewMode === 'timeline') {
-                timeAxisViewEl.style.display = 'block';
+                timeAxisViewEl.style.display = 'flex';
                 timeBlockListEl.style.display = 'none';
                 toggleViewBtn.innerHTML = '<span class="icon">📝</span> 列表视图';
             } else {
@@ -1747,21 +1772,9 @@
                 return;
             }
 
-            // 获取容器的实际内容高度（减去边框和内边距）
-            const gridHeight = timeAxisGridEl.clientHeight;
-            const gridRect = timeAxisGridEl.getBoundingClientRect();
-            console.log('时间轴容器 - clientHeight:', gridHeight, 'boundingRect高度:', gridRect.height, '边框:', gridRect.height - gridHeight, 'rect:', gridRect);
-
             const startHour = 6; // 从6点开始
             const endHour = 24;  // 到24点结束
             const hourRange = endHour - startHour;
-
-            // 考虑时间轴标签的内边距（上下各20px）
-            const verticalOffset = 20;
-            const availableHeight = gridHeight - verticalOffset * 2;
-            const pxPerHour = availableHeight / hourRange;
-
-            console.log('pxPerHour:', pxPerHour, '时间块数量:', state.timeBlocks.length, '可用高度:', availableHeight, '总高度:', gridHeight);
 
             state.timeBlocks.forEach((block, index) => {
                 if (!block.startTime || !block.endTime) return;
@@ -1776,33 +1789,10 @@
                 if (endHourDecimal < startHourDecimal) {
                     endHourDecimal = startHourDecimal + 1; // 默认1小时
                 }
-                let top = (startHourDecimal - startHour) * pxPerHour + verticalOffset;
-                const height = (endHourDecimal - startHourDecimal) * pxPerHour;
 
-                // 至少20像素高
-                const minHeight = 20;
-                const actualHeight = Math.max(height, minHeight);
-
-                // 确保不超出容器底部
-                const maxTop = gridHeight - actualHeight;
-                if (top > maxTop) {
-                    top = maxTop;
-                }
-                if (top < verticalOffset) {
-                    top = verticalOffset;
-                }
-
-                // 调试日志
-                console.log(`时间块 ${index}: ${block.startTime}-${block.endTime}`, {
-                    startH, startM, endH, endM,
-                    startHourDecimal, endHourDecimal,
-                    top, height, actualHeight,
-                    pxPerHour,
-                    verticalOffset,
-                    availableHeight,
-                    gridHeight,
-                    maxTop
-                });
+                // 采用百分比定位：与左侧刻度共用同一线性比例，不依赖实测像素高度
+                const topPercent = (startHourDecimal - startHour) / hourRange * 100;
+                const heightPercent = (endHourDecimal - startHourDecimal) / hourRange * 100;
 
                 const tagName = block.tags && block.tags.length > 0 ? block.tags[0] : '其他';
                 const tagClass = getTagClassName(tagName); // 转换为CSS类名
@@ -1810,8 +1800,8 @@
 
                 const timeBlockEl = document.createElement('div');
                 timeBlockEl.className = `time-block-timeline ${isSelected ? 'selected' : ''}`;
-                timeBlockEl.style.top = `${top}px`;
-                timeBlockEl.style.height = `${actualHeight}px`;
+                timeBlockEl.style.top = `${topPercent}%`;
+                timeBlockEl.style.height = `${heightPercent}%`;
                 timeBlockEl.style.backgroundColor = getTagColor(tagName);
                 timeBlockEl.title = `${block.startTime}-${block.endTime}: ${block.activity || ''}`;
 
@@ -2187,6 +2177,7 @@ total_time: ${totalHours}h${remainingMinutes > 0 ? remainingMinutes + 'm' : ''}
 
 ### 人生密度
 - **人生密度**: ${lifeDensityData.workHours.total > 0 ? lifeDensityData.lifeDensityIndex.toFixed(2) : '未填写工作时长，无法计算'}（总得分 ÷ 总工作时长）
+- **专注密度**: ${lifeDensityData.workHours.total > 0 ? (lifeDensityData.focusDensity || 0).toFixed(2) : '未填写工作时长，无法计算'}（高效工作时长 ÷ 总工作时长）
 
 ## 📝 笔记与反思
 
