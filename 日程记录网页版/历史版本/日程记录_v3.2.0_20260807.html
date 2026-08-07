@@ -395,10 +395,6 @@
                         <label>睡眠质量（1—5）</label>
                         <div class="rating-row" id="sleepQualityRating"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="sleepNote">睡眠评价（可选）</label>
-                        <input type="text" id="sleepNote" placeholder="">
-                    </div>
                 </div>
 
                 <div class="life-section">
@@ -443,13 +439,9 @@
                             <input type="number" id="readingDuration" min="0">
                         </div>
                         <div class="form-group">
-                            <label for="readingChapters">章节数（可选）</label>
-                            <input type="text" id="readingChapters" placeholder="">
+                            <label for="readingPages">页数（可选）</label>
+                            <input type="number" id="readingPages" min="0">
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="readingBook">书名</label>
-                        <div id="readingBookWrap"></div>
                     </div>
                     <div class="form-group">
                         <label for="readingTakeaway">一句所得（可选）</label>
@@ -590,23 +582,6 @@
         </div>
     </div>
 
-    <!-- 书架管理弹窗 -->
-    <div class="modal-overlay" id="bookshelfModal">
-        <div class="modal">
-            <div class="modal-header">📚 管理书架</div>
-            <div class="modal-body">
-                <div style="margin-bottom:12px;display:flex;gap:8px;">
-                    <input type="text" id="newBookName" placeholder="输入书名" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;">
-                    <button class="btn btn-primary btn-small" id="addBookBtn" style="flex-shrink:0;">➕ 添加</button>
-                </div>
-                <div class="project-list" id="bookshelfList"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" data-close="bookshelfModal">关闭</button>
-            </div>
-        </div>
-    </div>
-
     <script>
 /* 科研日程记录表 V3 - 核心逻辑 */
 (function () {
@@ -633,10 +608,10 @@
         selectedBlockId: null,
         timeBlocks: [],
         dailyFocus: { coreQuestion: '', tasks: [] },
-        sleep: { bedTime: null, wakeTime: null, quality: null, note: '' },
+        sleep: { bedTime: null, wakeTime: null, quality: null },
         life: {
             exercise: { done: false, durationMinutes: 0, type: '' },
-            reading: { done: false, durationMinutes: 0, bookId: '', chapters: '', takeaway: '' },
+            reading: { done: false, durationMinutes: 0, pages: null, takeaway: '' },
             energy: null,
             mood: null
         },
@@ -876,7 +851,6 @@
 
         const focusIndex = focusWeightedDenom > 0 ? (focusWeightedSum / focusWeightedDenom) * 100 : null;
         const progressIndex = progressWeightedDenom > 0 ? (progressWeightedSum / progressWeightedDenom) * 100 : null;
-        const workIndex = focusWeightedDenom > 0 ? Math.round(focusWeightedSum / SEGMENT_MINUTES) : null;
 
         const closed = work.filter(isClosed);
         const closureRate = work.length > 0 ? (closed.length / work.length) * 100 : null;
@@ -905,7 +879,6 @@
             fragmentHours: fragmentMins / 60,
             focusIndex,
             progressIndex,
-            workIndex,
             closureRate,
             evidenceRate,
             mainlineRate,
@@ -1056,122 +1029,8 @@
     function loadSettings() {
         try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { settings = {}; }
         if (!settings.projects) settings.projects = [];
-        if (!settings.books) settings.books = [];
     }
     function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
-
-    function getBookName(id) {
-        if (!id) return '';
-        const b = settings.books.find(x => x.id === id);
-        return b ? b.name : (id + '（已删除）');
-    }
-    function ensureBook(name) {
-        const n = String(name || '').trim();
-        if (!n) return '';
-        let b = settings.books.find(x => x.name === n);
-        if (!b) {
-            b = { id: uid(), name: n };
-            settings.books.push(b);
-            saveSettings();
-        }
-        return b.id;
-    }
-    function renderBookSelect(containerId, selectedId, inputId) {
-        const wrap = document.getElementById(containerId);
-        if (!wrap) return;
-        const selId = inputId + '_sel';
-        let html = `<div class="project-select-row">`;
-        html += `<select id="${selId}" style="padding:8px;border:1px solid #ddd;border-radius:6px;">`;
-        html += `<option value="">— 选择书目 —</option>`;
-        settings.books.forEach(b => {
-            html += `<option value="${b.id}" ${b.id === selectedId ? 'selected' : ''}>${escapeHtml(b.name)}</option>`;
-        });
-        html += `<option value="__new__">+ 添加新书</option></select>`;
-        html += `<button type="button" class="btn btn-outline btn-manage" onclick="App.openBookshelfManager()" title="管理书架">⚙</button>`;
-        html += `</div>`;
-        html += `<input type="text" id="${inputId}" placeholder="输入新书名" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:6px;display:none;">`;
-        wrap.innerHTML = html;
-        const sel = document.getElementById(selId);
-        const inp = document.getElementById(inputId);
-        sel.onchange = () => {
-            inp.style.display = sel.value === '__new__' ? 'block' : 'none';
-            if (sel.value !== '__new__') {
-                state.life.reading.bookId = sel.value;
-                persist();
-            }
-        };
-        inp.onchange = () => {
-            const name = inp.value.trim();
-            if (name) {
-                state.life.reading.bookId = ensureBook(name);
-                saveSettings();
-                renderLifeUI();
-            } else {
-                state.life.reading.bookId = '';
-                persist();
-            }
-        };
-        if (selectedId && !settings.books.find(b => b.id === selectedId)) {
-            inp.value = selectedId;
-            inp.style.display = 'block';
-            sel.value = '__new__';
-        }
-    }
-    function readBookFrom(containerId, inputId) {
-        const sel = document.getElementById(inputId + '_sel');
-        const inp = document.getElementById(inputId);
-        if (!sel) return '';
-        if (sel.value === '__new__') return ensureBook(inp.value);
-        return sel.value || ensureBook(inp?.value);
-    }
-    function renderBookshelf() {
-        const el = document.getElementById('bookshelfList');
-        if (!el) return;
-        if (!settings.books.length) {
-            el.innerHTML = '<div class="project-list-empty">暂无书目，在上方输入添加</div>';
-            return;
-        }
-        el.innerHTML = settings.books.map(b => `<div class="project-list-item">
-            <input type="text" class="pj-name" value="${escapeHtml(b.name)}" data-bid="${b.id}" onchange="App.updateBookName('${b.id}', this.value)">
-            <button class="btn btn-danger btn-small" onclick="App.deleteBook('${b.id}')" title="删除">🗑</button>
-        </div>`).join('');
-    }
-    function openBookshelfManager() {
-        renderBookshelf();
-        document.getElementById('bookshelfModal').classList.add('show');
-    }
-    function addBookFromInput() {
-        const inp = document.getElementById('newBookName');
-        const name = inp.value.trim();
-        if (!name) { alert('请输入书名'); return; }
-        if (settings.books.find(b => b.name === name)) {
-            alert('该书已存在');
-            return;
-        }
-        settings.books.push({ id: uid(), name: name });
-        saveSettings();
-        inp.value = '';
-        renderBookshelf();
-        renderLifeUI();
-    }
-    function updateBookName(id, newName) {
-        const n = String(newName || '').trim();
-        if (!n) { alert('书名不能为空'); renderBookshelf(); return; }
-        const dup = settings.books.find(b => b.name === n && b.id !== id);
-        if (dup) { alert('该书已存在'); renderBookshelf(); return; }
-        const b = settings.books.find(x => x.id === id);
-        if (b) { b.name = n; saveSettings(); }
-        renderLifeUI();
-    }
-    function deleteBook(id) {
-        const b = settings.books.find(x => x.id === id);
-        if (!b) return;
-        if (!confirm(`确定删除《${b.name}》？`)) return;
-        settings.books = settings.books.filter(x => x.id !== id);
-        saveSettings();
-        renderBookshelf();
-        renderLifeUI();
-    }
 
     function migrateDayData(raw) {
         if (!raw) return null;
@@ -1196,10 +1055,10 @@
             schemaVersion: 3,
             timeBlocks: [],
             dailyFocus: { coreQuestion: '', tasks: [] },
-            sleep: { bedTime: null, wakeTime: null, quality: null, note: '' },
+            sleep: { bedTime: null, wakeTime: null, quality: null },
             life: {
                 exercise: { done: false, durationMinutes: 0, type: '' },
-                reading: { done: false, durationMinutes: 0, bookId: '', chapters: '', takeaway: '' },
+                reading: { done: false, durationMinutes: 0, pages: null, takeaway: '' },
                 energy: null, mood: null
             },
             reflection: { keyOutputs: '', stuckOrDropped: '', tomorrowPriority: '', extraNotes: '' },
@@ -1261,18 +1120,6 @@
         return migrated;
     }
 
-    function migrateLife(life) {
-        if (!life) return state.life;
-        if (!life.reading) life.reading = state.life.reading;
-        const rd = life.reading;
-        if (rd.bookId == null) rd.bookId = '';
-        if (rd.chapters == null) {
-            rd.chapters = rd.pages != null ? String(rd.pages) : '';
-            delete rd.pages;
-        }
-        return life;
-    }
-
     function migrateReflection(refl) {
         if (!refl) return { keyOutputs: '', stuckOrDropped: '', tomorrowPriority: '', extraNotes: '' };
         // Already migrated
@@ -1329,8 +1176,7 @@
         state.sleep = data.sleep || state.sleep;
         if (state.sleep.targetBedTime != null) delete state.sleep.targetBedTime;
         if (state.sleep.quality == null) state.sleep.quality = null;
-        if (state.sleep.note == null) state.sleep.note = '';
-        state.life = migrateLife(data.life);
+        state.life = data.life || state.life;
         state.reflection = migrateReflection(data.reflection);
         state.viewMode = data.viewMode || 'list';
         state.legacy = data.legacy || null;
@@ -1548,15 +1394,32 @@
     function renderMetrics() {
         const m = calcMetrics(state.timeBlocks);
         const grid = document.getElementById('metricGrid');
+        const hint = document.getElementById('metricHint');
         const items = [
-            { label: '工作指数', value: m.workIndex != null ? m.workIndex : '—', cls: 'focus' },
             { label: '总工作时长', value: formatHours(m.totalWorkHours) },
             { label: '深度工作时长', value: formatHours(m.deepWorkHours), cls: 'focus' },
-            { label: '工作闭环数量', value: m.researchLoops }
+            { label: '高质量工作时长', value: formatHours(m.highQualityHours), cls: 'focus' },
+            { label: '专注指数', value: formatPct(m.focusIndex), cls: 'focus' },
+            { label: '推进指数', value: formatPct(m.progressIndex), cls: 'progress' },
+            { label: '闭环率', value: formatPct(m.closureRate) },
+            { label: '科研闭环', value: m.researchLoops },
+            { label: '阶段节点', value: m.milestones },
+            { label: '高推进时长', value: formatHours(m.highProgressHours), cls: 'progress' },
+            { label: '有效工作时长', value: formatHours(m.effectiveWorkHours) },
+            { label: '空转时长', value: formatHours(m.idleHours) },
+            { label: '碎片工作时长', value: formatHours(m.fragmentHours) },
+            { label: '主线一致度', value: formatPct(m.mainlineRate) }
         ];
         grid.innerHTML = items.map(it =>
             `<div class="metric-card ${it.cls || ''}"><div class="label">${it.label}</div><div class="value">${it.value}</div></div>`
         ).join('');
+
+        if (m.workBlockCount > 0 && m.scoredRatio < 0.5) {
+            hint.style.display = 'block';
+            hint.textContent = '样本不足：已评分工作时长占比 ' + Math.round(m.scoredRatio * 100) + '%，指数仅供参考';
+        } else {
+            hint.style.display = 'none';
+        }
     }
 
     function renderBlockList() {
@@ -1806,7 +1669,6 @@
         document.getElementById('wakeTime').value = state.sleep.wakeTime || '';
         const sm = calcSleepMinutes(state.sleep.bedTime, state.sleep.wakeTime);
         document.getElementById('sleepDuration').textContent = formatSleepDisplay(sm);
-        document.getElementById('sleepNote').value = state.sleep.note || '';
 
         const ex = state.life.exercise;
         document.getElementById('exerciseDone').checked = ex.done;
@@ -1816,9 +1678,8 @@
         const rd = state.life.reading;
         document.getElementById('readingDone').checked = rd.done;
         document.getElementById('readingDuration').value = rd.durationMinutes || '';
-        document.getElementById('readingChapters').value = rd.chapters || '';
+        document.getElementById('readingPages').value = rd.pages ?? '';
         document.getElementById('readingTakeaway').value = rd.takeaway || '';
-        renderBookSelect('readingBookWrap', rd.bookId || '', 'readingBook');
 
         renderRating('sleepQualityRating', state.sleep.quality, v => { state.sleep.quality = v; persist(); });
         renderRating('energyRating', state.life.energy, v => { state.life.energy = v; persist(); });
@@ -2108,14 +1969,12 @@ total_work_hours: ${(m.totalWorkHours || 0).toFixed(1)}
 deep_work_hours: ${(m.deepWorkHours || 0).toFixed(1)}
 high_quality_hours: ${(m.highQualityHours || 0).toFixed(1)}
 focus_index: ${m.focusIndex != null ? Math.round(m.focusIndex) : 'null'}
-work_index: ${m.workIndex != null ? m.workIndex : 'null'}
 progress_index: ${m.progressIndex != null ? Math.round(m.progressIndex) : 'null'}
 closure_rate: ${m.closureRate != null ? Math.round(m.closureRate) : 'null'}
 research_loops: ${m.researchLoops}
 milestones: ${m.milestones}
 sleep_hours: ${(sm / 60).toFixed(1)}
 sleep_quality: ${state.sleep.quality ?? 'null'}
-sleep_note: ${state.sleep.note ? `"${state.sleep.note}"` : 'null'}
 energy: ${state.life.energy ?? 'null'}
 mood: ${state.life.mood ?? 'null'}
 ---
@@ -2170,7 +2029,6 @@ ${state.dailyFocus.coreQuestion || '（未填写）'}
         md += `- 深度工作时长：${formatHours(m.deepWorkHours)}\n`;
         md += `- 高质量工作时长：${formatHours(m.highQualityHours)}\n`;
         md += `- 专注指数：${formatPct(m.focusIndex)}\n`;
-        md += `- 工作指数：${m.workIndex != null ? m.workIndex : '—'}\n`;
         md += `- 推进指数：${formatPct(m.progressIndex)}\n`;
         md += `- 闭环率：${formatPct(m.closureRate)}\n`;
 
@@ -2179,15 +2037,8 @@ ${state.dailyFocus.coreQuestion || '（未填写）'}
         if (state.sleep.wakeTime) md += `- 起床：${state.sleep.wakeTime}\n`;
         if (sm) md += `- 睡眠时长：${formatSleepDisplay(sm)}\n`;
         if (state.sleep.quality) md += `- 睡眠质量：${state.sleep.quality}/5\n`;
-        if (state.sleep.note) md += `- 睡眠评价：${state.sleep.note}\n`;
         if (state.life.exercise.done) md += `- 运动：${state.life.exercise.durationMinutes} 分钟，${state.life.exercise.type || '—'}\n`;
-        if (state.life.reading.done) {
-            md += `- 阅读：${state.life.reading.durationMinutes} 分钟`;
-            if (state.life.reading.bookId) md += `，《${getBookName(state.life.reading.bookId)}》`;
-            if (state.life.reading.chapters) md += `，${state.life.reading.chapters} 章节`;
-            if (state.life.reading.takeaway) md += `（${state.life.reading.takeaway}）`;
-            md += `\n`;
-        }
+        if (state.life.reading.done) md += `- 阅读：${state.life.reading.durationMinutes} 分钟\n`;
         if (state.life.energy) md += `- 精力：${state.life.energy}/5\n`;
         if (state.life.mood) md += `- 心情：${state.life.mood}/5\n`;
 
@@ -2221,7 +2072,7 @@ ${state.dailyFocus.coreQuestion || '（未填写）'}
         state.dailyFocus = { coreQuestion: '', tasks: [] };
         state.reflection = { keyOutputs: '', stuckOrDropped: '', tomorrowPriority: '', extraNotes: '' };
         state.life = { exercise: { done: false, durationMinutes: 0, type: '' }, reading: { done: false, durationMinutes: 0, pages: null, takeaway: '' }, energy: null, mood: null };
-        state.sleep = { bedTime: null, wakeTime: null, quality: null, note: '' };
+        state.sleep = { bedTime: null, wakeTime: null, quality: null };
         renderAll();
         renderLifeUI();
         renderReflectionUI();
@@ -2263,8 +2114,6 @@ ${state.dailyFocus.coreQuestion || '（未填写）'}
         document.getElementById('projectManageBtn').onclick = openProjectManager;
         document.getElementById('addProjectBtn').onclick = addProjectFromInput;
         document.getElementById('newProjectName').onkeydown = e => { if (e.key === 'Enter') addProjectFromInput(); };
-        document.getElementById('addBookBtn').onclick = addBookFromInput;
-        document.getElementById('newBookName').onkeydown = e => { if (e.key === 'Enter') addBookFromInput(); };
 
         document.querySelectorAll('[data-close]').forEach(btn => {
             btn.onclick = () => document.getElementById(btn.dataset.close).classList.remove('show');
@@ -2307,9 +2156,8 @@ ${state.dailyFocus.coreQuestion || '（未填写）'}
         };
         document.getElementById('readingDone').onchange = e => { state.life.reading.done = e.target.checked; persist(); };
         document.getElementById('readingDuration').oninput = e => { state.life.reading.durationMinutes = parseInt(e.target.value, 10) || 0; persist(); };
-        document.getElementById('readingChapters').oninput = e => { state.life.reading.chapters = e.target.value; persist(); };
+        document.getElementById('readingPages').oninput = e => { state.life.reading.pages = parseInt(e.target.value, 10) || null; persist(); };
         document.getElementById('readingTakeaway').oninput = e => { state.life.reading.takeaway = e.target.value; persist(); };
-        document.getElementById('sleepNote').oninput = e => { state.sleep.note = e.target.value; persist(); };
     }
 
     function updateClock() {
@@ -2335,8 +2183,7 @@ ${state.dailyFocus.coreQuestion || '（未填写）'}
     window.App = {
         selectBlock, updateBlock, updateBlockSilent, removeBlock, toggleWork, openEndWork,
         updateTask, removeTask, renderTasks, ensureProject,
-        openProjectManager, updateProjectName, deleteProject, renderProjectList,
-        openBookshelfManager, updateBookName, deleteBook, renderBookshelf
+        openProjectManager, updateProjectName, deleteProject, renderProjectList
     };
 
     window.addEventListener('DOMContentLoaded', init);
